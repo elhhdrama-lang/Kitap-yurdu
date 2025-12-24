@@ -104,13 +104,20 @@ namespace WebKitapyurdu.Controllers
 
             book.SellerID = sellerId.Value;
 
-            if (_dbHelper.AddBook(book))
+            if (ModelState.IsValid)
             {
-                TempData["Success"] = "Ürün eklendi.";
-                return RedirectToAction("MyProducts");
+                if (_dbHelper.AddBook(book))
+                {
+                    TempData["Success"] = "Ürün başarıyla eklendi.";
+                    return RedirectToAction("MyProducts");
+                }
+                ViewBag.Error = "Ürün eklenirken bir veritabanı hatası oluştu. Lütfen bilgileri kontrol edip tekrar deneyin (ISBN benzersiz olmalıdır).";
+            }
+            else
+            {
+                ViewBag.Error = "Lütfen formdaki eksik veya hatalı alanları düzeltin.";
             }
 
-            ViewBag.Error = "Ürün eklenirken hata oluştu.";
             ViewBag.Authors = _dbHelper.GetAllAuthors();
             ViewBag.Categories = _dbHelper.GetAllCategories();
             return View(book);
@@ -138,23 +145,27 @@ namespace WebKitapyurdu.Controllers
             var sellerId = HttpContext.Session.GetInt32("SellerID");
             if (sellerId == null) return RedirectToAction("Login");
 
-            // Ownership check (Double check before update)
+            // Ownership check
             var existingBooks = _dbHelper.GetBooksBySeller(sellerId.Value);
             if (!existingBooks.Any(b => b.BookID == book.BookID))
             {
                 return Unauthorized();
             }
             
-            // Re-assign SellerID to be safe (or ensure Model Binding doesn't lose it if hidden)
-            // But UpdateBook in DB doesn't update SellerID, so it's fine.
-            
-            if (_dbHelper.UpdateBook(book))
+            if (ModelState.IsValid)
             {
-                TempData["Success"] = "Ürün güncellendi.";
-                return RedirectToAction("MyProducts");
+                if (_dbHelper.UpdateBook(book))
+                {
+                    TempData["Success"] = "Ürün başarıyla güncellendi.";
+                    return RedirectToAction("MyProducts");
+                }
+                ViewBag.Error = "Güncelleme sırasında bir hata oluştu. Lütfen bilgileri kontrol edin.";
             }
-             
-            ViewBag.Error = "Güncelleme hatası.";
+            else
+            {
+                ViewBag.Error = "Lütfen formdaki eksik veya hatalı alanları düzeltin.";
+            }
+
             ViewBag.Authors = _dbHelper.GetAllAuthors();
             ViewBag.Categories = _dbHelper.GetAllCategories();
             return View(book);

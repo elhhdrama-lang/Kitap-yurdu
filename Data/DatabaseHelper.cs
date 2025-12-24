@@ -472,25 +472,32 @@ namespace WebKitapyurdu.Data
         public List<Category> GetAllCategories()
         {
             var categories = new List<Category>();
-            using (var connection = GetConnection())
+            try
             {
-                connection.Open();
-                var query = "SELECT * FROM Categories ORDER BY CategoryName";
-                using (var command = new SqlCommand(query, connection))
+                using (var connection = GetConnection())
                 {
-                    using (var reader = command.ExecuteReader())
+                    connection.Open();
+                    var query = "SELECT * FROM Categories ORDER BY CategoryName";
+                    using (var command = new SqlCommand(query, connection))
                     {
-                        while (reader.Read())
+                        using (var reader = command.ExecuteReader())
                         {
-                            categories.Add(new Category
+                            while (reader.Read())
                             {
-                                CategoryID = reader.GetInt32("CategoryID"),
-                                CategoryName = reader.GetString("CategoryName"),
-                                Description = reader.IsDBNull("Description") ? null : reader.GetString("Description")
-                            });
+                                categories.Add(new Category
+                                {
+                                    CategoryID = reader.GetInt32("CategoryID"),
+                                    CategoryName = reader.GetString("CategoryName"),
+                                    Description = reader.IsDBNull("Description") ? null : reader.GetString("Description")
+                                });
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("GetAllCategories Error: " + ex.Message);
             }
             return categories;
         }
@@ -880,26 +887,33 @@ namespace WebKitapyurdu.Data
         public List<Author> GetAllAuthors()
         {
             var authors = new List<Author>();
-            using (var connection = GetConnection())
+            try
             {
-                connection.Open();
-                var query = "SELECT * FROM Authors ORDER BY FirstName, LastName";
-                using (var command = new SqlCommand(query, connection))
+                using (var connection = GetConnection())
                 {
-                    using (var reader = command.ExecuteReader())
+                    connection.Open();
+                    var query = "SELECT * FROM Authors ORDER BY FirstName, LastName";
+                    using (var command = new SqlCommand(query, connection))
                     {
-                        while (reader.Read())
+                        using (var reader = command.ExecuteReader())
                         {
-                            authors.Add(new Author
+                            while (reader.Read())
                             {
-                                AuthorID = reader.GetInt32("AuthorID"),
-                                FirstName = reader.GetString("FirstName"),
-                                LastName = reader.GetString("LastName"),
-                                Biography = reader.IsDBNull("Biography") ? null : reader.GetString("Biography")
-                            });
+                                authors.Add(new Author
+                                {
+                                    AuthorID = reader.GetInt32("AuthorID"),
+                                    FirstName = reader.GetString("FirstName"),
+                                    LastName = reader.GetString("LastName"),
+                                    Biography = reader.IsDBNull("Biography") ? null : reader.GetString("Biography")
+                                });
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("GetAllAuthors Error: " + ex.Message);
             }
             return authors;
         }
@@ -909,30 +923,45 @@ namespace WebKitapyurdu.Data
         /// </summary>
         public bool AddBook(Book book)
         {
-            using (var connection = GetConnection())
+            try
             {
-                connection.Open();
-                var query = @"INSERT INTO Books (Title, AuthorID, CategoryID, Publisher, Price, Description, StockQuantity, ImageURL, ISBN, PageCount, Language, PublishedDate, SellerID, CreatedDate)
-                              VALUES (@Title, @AuthorID, @CategoryID, @Publisher, @Price, @Description, @StockQuantity, @ImageURL, @ISBN, @PageCount, @Language, @PublishedDate, @SellerID, GETDATE())";
-                
-                using (var command = new SqlCommand(query, connection))
+                using (var connection = GetConnection())
                 {
-                    command.Parameters.AddWithValue("@Title", book.Title);
-                    command.Parameters.AddWithValue("@AuthorID", book.AuthorID);
-                    command.Parameters.AddWithValue("@CategoryID", book.CategoryID);
-                    command.Parameters.AddWithValue("@Publisher", (object?)book.Publisher ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Price", book.Price);
-                    command.Parameters.AddWithValue("@Description", (object?)book.Description ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@StockQuantity", book.StockQuantity);
-                    command.Parameters.AddWithValue("@ImageURL", (object?)book.ImageURL ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@ISBN", (object?)book.ISBN ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@PageCount", (object?)book.PageCount ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Language", (object?)book.Language ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@PublishedDate", (object?)book.PublishedDate ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@SellerID", (object?)book.SellerID ?? DBNull.Value);
+                    connection.Open();
+                    var query = @"INSERT INTO Books (Title, AuthorID, CategoryID, Publisher, Price, Description, StockQuantity, ImageURL, ISBN, PageCount, Language, PublishedDate, SellerID, CreatedDate)
+                                  VALUES (@Title, @AuthorID, @CategoryID, @Publisher, @Price, @Description, @StockQuantity, @ImageURL, @ISBN, @PageCount, @Language, @PublishedDate, @SellerID, GETDATE())";
                     
-                    return command.ExecuteNonQuery() > 0;
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Title", book.Title ?? "");
+                        command.Parameters.AddWithValue("@AuthorID", book.AuthorID);
+                        command.Parameters.AddWithValue("@CategoryID", book.CategoryID);
+                        command.Parameters.AddWithValue("@Publisher", (object?)book.Publisher ?? DBNull.Value);
+                        
+                        var priceParam = new SqlParameter("@Price", SqlDbType.Decimal) { Value = book.Price, Precision = 18, Scale = 2 };
+                        command.Parameters.Add(priceParam);
+                        
+                        command.Parameters.AddWithValue("@Description", (object?)book.Description ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@StockQuantity", book.StockQuantity);
+                        command.Parameters.AddWithValue("@ImageURL", (object?)book.ImageURL ?? DBNull.Value);
+                        
+                        // Handle empty ISBN as NULL
+                        command.Parameters.AddWithValue("@ISBN", string.IsNullOrWhiteSpace(book.ISBN) ? DBNull.Value : book.ISBN);
+                        
+                        command.Parameters.AddWithValue("@PageCount", (object?)book.PageCount ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@Language", (object?)book.Language ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@PublishedDate", (object?)book.PublishedDate ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@SellerID", (object?)book.SellerID ?? DBNull.Value);
+                        
+                        return command.ExecuteNonQuery() > 0;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                // Hata durumunda loglama yapılabilir
+                System.Diagnostics.Debug.WriteLine("AddBook Error: " + ex.Message);
+                return false;
             }
         }
 
@@ -941,42 +970,56 @@ namespace WebKitapyurdu.Data
         /// </summary>
         public bool UpdateBook(Book book)
         {
-            using (var connection = GetConnection())
+            try
             {
-                connection.Open();
-                var query = @"UPDATE Books 
-                              SET Title = @Title, 
-                                  AuthorID = @AuthorID, 
-                                  CategoryID = @CategoryID, 
-                                  Publisher = @Publisher,
-                                  Price = @Price, 
-                                  Description = @Description, 
-                                  StockQuantity = @StockQuantity, 
-                                  ImageURL = @ImageURL, 
-                                  ISBN = @ISBN,
-                                  PageCount = @PageCount,
-                                  Language = @Language,
-                                  PublishedDate = @PublishedDate
-                              WHERE BookID = @BookID";
-                
-                using (var command = new SqlCommand(query, connection))
+                using (var connection = GetConnection())
                 {
-                    command.Parameters.AddWithValue("@BookID", book.BookID);
-                    command.Parameters.AddWithValue("@Title", book.Title);
-                    command.Parameters.AddWithValue("@AuthorID", book.AuthorID);
-                    command.Parameters.AddWithValue("@CategoryID", book.CategoryID);
-                    command.Parameters.AddWithValue("@Publisher", (object?)book.Publisher ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Price", book.Price);
-                    command.Parameters.AddWithValue("@Description", (object?)book.Description ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@StockQuantity", book.StockQuantity);
-                    command.Parameters.AddWithValue("@ImageURL", (object?)book.ImageURL ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@ISBN", (object?)book.ISBN ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@PageCount", (object?)book.PageCount ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Language", (object?)book.Language ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@PublishedDate", (object?)book.PublishedDate ?? DBNull.Value);
+                    connection.Open();
+                    var query = @"UPDATE Books 
+                                  SET Title = @Title, 
+                                      AuthorID = @AuthorID, 
+                                      CategoryID = @CategoryID, 
+                                      Publisher = @Publisher,
+                                      Price = @Price, 
+                                      Description = @Description, 
+                                      StockQuantity = @StockQuantity, 
+                                      ImageURL = @ImageURL, 
+                                      ISBN = @ISBN,
+                                      PageCount = @PageCount,
+                                      Language = @Language,
+                                      PublishedDate = @PublishedDate
+                                  WHERE BookID = @BookID";
+                    
+                    using (var command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@BookID", book.BookID);
+                        command.Parameters.AddWithValue("@Title", book.Title ?? "");
+                        command.Parameters.AddWithValue("@AuthorID", book.AuthorID);
+                        command.Parameters.AddWithValue("@CategoryID", book.CategoryID);
+                        command.Parameters.AddWithValue("@Publisher", (object?)book.Publisher ?? DBNull.Value);
+                        
+                        var priceParam = new SqlParameter("@Price", SqlDbType.Decimal) { Value = book.Price, Precision = 18, Scale = 2 };
+                        command.Parameters.Add(priceParam);
 
-                    return command.ExecuteNonQuery() > 0;
+                        command.Parameters.AddWithValue("@Description", (object?)book.Description ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@StockQuantity", book.StockQuantity);
+                        command.Parameters.AddWithValue("@ImageURL", (object?)book.ImageURL ?? DBNull.Value);
+                        
+                        // Handle empty ISBN as NULL
+                        command.Parameters.AddWithValue("@ISBN", string.IsNullOrWhiteSpace(book.ISBN) ? DBNull.Value : book.ISBN);
+                        
+                        command.Parameters.AddWithValue("@PageCount", (object?)book.PageCount ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@Language", (object?)book.Language ?? DBNull.Value);
+                        command.Parameters.AddWithValue("@PublishedDate", (object?)book.PublishedDate ?? DBNull.Value);
+
+                        return command.ExecuteNonQuery() > 0;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("UpdateBook Error: " + ex.Message);
+                return false;
             }
         }
 
