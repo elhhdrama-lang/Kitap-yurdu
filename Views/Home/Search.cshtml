@@ -1,0 +1,99 @@
+@model List<Book>
+@{
+    ViewData["Title"] = "Arama Sonuçları - Collection 2025";
+}
+
+<div class="hero-wrapper pb-5" style="padding-top: 4rem; clip-path: none; margin-bottom: 0; min-height: 300px;">
+    <div class="container mt-5 text-center">
+        <span class="badge-premium mb-3 d-inline-block animate__animated animate__fadeInDown">Koleksiyon Keşfi</span>
+        <h1 class="hero-title animate__animated animate__fadeInUp">
+            @if (ViewBag.SearchQuery != null)
+            {
+                <span>"@ViewBag.SearchQuery"</span>
+            }
+            else
+            {
+                <span>Tüm Eserler</span>
+            }
+        </h1>
+        @if (ViewBag.ResultCount != null)
+        {
+            <p class="lead text-white opacity-75 animate__animated animate__fadeInUp">@ViewBag.ResultCount şaheser bulundu.</p>
+        }
+    </div>
+</div>
+
+<div class="container my-5 pt-5">
+    @if (Model.Any())
+    {
+        <div class="row g-5">
+            @foreach (var book in Model)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="book-card p-0 d-flex flex-column h-100">
+                        <div class="card-img-wrapper">
+                            <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "https://via.placeholder.com/300x450?text=No+Image" : book.ImageURL)" 
+                                 class="card-img-top" alt="@book.Title">
+                            <div class="hover-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center opacity-0 transition-300">
+                                 <a href="/Book/Details/@book.BookID" class="btn btn-light rounded-circle p-3 shadow"><i class="bi bi-eye"></i></a>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge-premium py-1" style="font-size: 0.6rem;">@book.CategoryName</span>
+                                @if (book.AverageRating > 0)
+                                {
+                                    <div class="text-warning small" style="font-size: 0.7rem;">
+                                        <i class="bi bi-star-fill"></i> @book.AverageRating.ToString("F1")
+                                    </div>
+                                }
+                            </div>
+                            <h6 class="display-font fw-bold mb-1 text-truncate" title="@book.Title">@book.Title</h6>
+                            <small class="text-muted mb-3">@book.AuthorName</small>
+                            <div class="mt-auto d-flex align-items-center justify-content-between pt-3 border-top">
+                                <div class="fw-bold text-dark h5 mb-0">@book.Price.ToString("C")</div>
+                                <button type="button" class="btn btn-link text-dark p-0" onclick="addToCart(@book.BookID)">
+                                    <i class="bi bi-plus-circle fs-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="book-card p-5 d-inline-block border-0 bg-white">
+                <i class="bi bi-search fs-1 text-muted mb-3 d-block"></i>
+                <h4 class="display-font">Sonuç Bulunamadı</h4>
+                <p class="text-muted mb-4">Aradığınız kriterlere uygun bir eser şimdilik koleksiyonumuzda yer almıyor.</p>
+                <a href="/" class="btn-premium px-4 py-2">Ana Sayfaya Dön</a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function addToCart(bookId) {
+            fetch('/Cart/Add?bookId=' + bookId + '&quantity=1', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Ürün sepetinize eklendi.');
+                    if (typeof updateCartBadge === 'function') {
+                        updateCartBadge(data.cartCount);
+                    }
+                } else {
+                    showNotification(data.message || 'Bir hata oluştu.', 'error');
+                }
+            });
+        }
+    </script>
+}
+

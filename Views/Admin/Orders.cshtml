@@ -1,0 +1,109 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Sipariş Yönetimi";
+}
+
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/Admin/Dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Siparişler</li>
+                </ol>
+            </nav>
+            <h1 class="display-font fw-bold">Sipariş Yönetimi</h1>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-4 shadow-sm border overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="px-4 py-3">Sipariş #</th>
+                        <th class="py-3">Müşteri</th>
+                        <th class="py-3">Tarih</th>
+                        <th class="py-3">Tutar</th>
+                        <th class="py-3">Durum</th>
+                        <th class="px-4 py-3 text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td class="px-4 fw-bold">#@order.OrderID</td>
+                            <td>@order.Username</td>
+                            <td>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="fw-bold">@order.TotalAmount.ToString("C")</td>
+                            <td>
+                                <select class="form-select form-select-sm rounded-pill status-select @(order.Status == "Cancelled" ? "text-danger" : (order.Status == "Shipped" ? "text-success" : "text-primary"))" 
+                                        onchange="updateOrderStatus(@order.OrderID, this.value)">
+                                    <option value="Pending" selected="@(order.Status == "Pending" ? "selected" : null)">Beklemede</option>
+                                    <option value="Processing" selected="@(order.Status == "Processing" ? "selected" : null)">Hazırlanıyor</option>
+                                    <option value="Shipped" selected="@(order.Status == "Shipped" ? "selected" : null)">Kargoya Verildi</option>
+                                    <option value="Delivered" selected="@(order.Status == "Delivered" ? "selected" : null)">Teslim Edildi</option>
+                                    <option value="Cancelled" selected="@(order.Status == "Cancelled" ? "selected" : null)">İptal Edildi</option>
+                                </select>
+                            </td>
+                            <td class="px-4 text-end">
+                                <button class="btn btn-sm btn-light rounded-pill px-3" onclick="showOrderDetails(@order.OrderID)">Detay</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Order Detail Modal (Simplified for now) -->
+<div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Sipariş Detayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderModalContent">
+                <!-- Ajax content here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateOrderStatus(orderId, status) {
+        const formData = new URLSearchParams();
+        formData.append('orderId', orderId);
+        formData.append('status', status);
+
+        fetch('/Admin/UpdateOrderStatus', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification("Sipariş durumu güncellendi.");
+                location.reload(); // To update colors/styles easily
+            } else {
+                showNotification("Bir hata oluştu.", "error");
+            }
+        });
+    }
+
+    function showOrderDetails(orderId) {
+        // This could be an AJAX call to a partial view
+        alert("Sipariş detayları yakında eklenecek. Seçilen ID: #" + orderId);
+    }
+</script>
+
+<style>
+    .status-select {
+        min-width: 140px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+</style>

@@ -1,0 +1,160 @@
+@model List<CartItem>
+@{
+    ViewData["Title"] = "Sepetim";
+    var total = Model.Sum(item => item.SubTotal);
+}
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="bi bi-cart"></i> Sepetim</h2>
+        
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Kitap</th>
+                            <th>Yazar</th>
+                            <th>Fiyat</th>
+                            <th>Adet</th>
+                            <th>Toplam</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr id="cart-item-@item.CartID">
+                                <td>@item.BookTitle</td>
+                                <td>@item.AuthorName</td>
+                                <td>@item.Price.ToString("C")</td>
+                                <td>
+                                    <div class="input-group" style="width: 120px;">
+                                        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(@item.CartID, @item.Quantity - 1, @item.StockQuantity)">-</button>
+                                        <input type="number" class="form-control form-control-sm text-center" value="@item.Quantity" min="1" max="@item.StockQuantity" id="quantity-@item.CartID" readonly>
+                                        <button class="btn btn-outline-secondary btn-sm" type="button" onclick="updateQuantity(@item.CartID, @item.Quantity + 1, @item.StockQuantity)">+</button>
+                                    </div>
+                                    @if (item.StockQuantity <= item.Quantity)
+                                    {
+                                        <small class="text-danger">Stok: @item.StockQuantity adet</small>
+                                    }
+                                </td>
+                                <td id="subtotal-@item.CartID">@item.SubTotal.ToString("C")</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="removeItem(@item.CartID)">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="5" class="text-end">Toplam:</th>
+                            <th id="totalAmount">@total.ToString("C")</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <div class="mt-4">
+                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#orderModal">
+                    <i class="bi bi-check-circle"></i> Sipariş Ver
+                </button>
+                <a href="/" class="btn btn-secondary">Alışverişe Devam Et</a>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Sepetiniz boş. Alışverişe başlamak için <a href="/">ana sayfaya</a> gidin.
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Sipariş Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-heavy rounded-4">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h4 class="modal-title display-font">Teslimat Bilgileri</h4>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="/Order/Create">
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-4">Lütfen ürünlerinizi ulaştırabilmemiz için güncel adresinizi giriniz.</p>
+                    
+                    <div class="mb-4">
+                        <label for="shippingAddress" class="form-label small fw-bold text-uppercase">Teslimat Adresi</label>
+                        <textarea class="form-control bg-light border-0 py-3" id="shippingAddress" name="shippingAddress" rows="4" placeholder="Adresinizi detaylı bir şekilde yazınız..." required style="resize: none;"></textarea>
+                    </div>
+
+                    <div class="p-3 rounded-3 d-flex justify-content-between align-items-center" style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.1);">
+                        <span class="text-muted">Toplam Ödenecek</span>
+                        <span class="h5 mb-0 text-accent fw-bold">@total.ToString("C")</span>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4">
+                    <button type="button" class="btn btn-glass px-4" data-bs-toggle="modal" data-bs-target="#orderModal">İptal</button>
+                    <button type="submit" class="btn btn-premium px-4">
+                         Ödemeye Geç <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateQuantity(cartId, newQuantity, stockQuantity) {
+            if (newQuantity < 1) {
+                removeItem(cartId);
+                return;
+            }
+            
+            if (newQuantity > stockQuantity) {
+                showNotification('Stokta sadece ' + stockQuantity + ' adet ürün bulunmaktadır.', 'error');
+                return;
+            }
+
+            fetch('/Cart/Update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `cartId=${cartId}&quantity=${newQuantity}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    showNotification(data.message || 'Bir hata oluştu.', 'error');
+                }
+            })
+            .catch(err => showNotification('Bağlantı hatası.', 'error'));
+        }
+
+        function removeItem(cartId) {
+            if (!confirm('Ürünü sepetten çıkarmak istediğinize emin misiniz?')) return;
+            
+            fetch('/Cart/Remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `cartId=${cartId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Ürün sepetten çıkarıldı.');
+                    location.reload();
+                } else {
+                    showNotification(data.message || 'Bir hata oluştu.', 'error');
+                }
+            })
+            .catch(err => showNotification('Bağlantı hatası.', 'error'));
+        }
+    </script>
+}
+

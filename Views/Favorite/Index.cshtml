@@ -1,0 +1,68 @@
+@model List<Favorite>
+@{
+    ViewData["Title"] = "Favorilerim";
+}
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="bi bi-heart-fill text-danger"></i> Favorilerim</h2>
+        
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var favorite in Model)
+                {
+                    <div class="col-md-3 mb-4">
+                        <div class="card book-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">@favorite.BookTitle</h5>
+                                <p class="card-text text-muted">
+                                    <small>@favorite.AuthorName</small>
+                                </p>
+                                <p class="card-text">
+                                    <strong class="text-primary">@favorite.Price.ToString("C")</strong>
+                                </p>
+                                <div class="d-grid gap-2">
+                                    <a href="/Book/Details/@favorite.BookID" class="btn btn-primary btn-sm">Detaylar</a>
+                                    <button class="btn btn-danger btn-sm" onclick="removeFavorite(@favorite.BookID)">
+                                        <i class="bi bi-heart-break"></i> Favorilerden Çıkar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Henüz favorilerinize ürün eklemediniz.
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function removeFavorite(bookId) {
+            fetch('/Favorite/Remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `bookId=${bookId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    location.reload(); // Favori sayfasını listeyi güncellemek için yeniliyoruz
+                } else {
+                    showNotification(data.message || 'Bir hata oluştu.', 'error');
+                }
+            });
+        }
+    </script>
+}
+

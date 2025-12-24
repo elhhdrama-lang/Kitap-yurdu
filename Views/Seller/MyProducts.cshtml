@@ -1,0 +1,85 @@
+@model List<Book>
+@{
+    ViewData["Title"] = "Ürünlerim";
+    Layout = "~/Views/Shared/_LayoutSeller.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Ürün Listesi</h2>
+    <a href="/Seller/AddProduct" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Yeni Ürün Ekle
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Resim</th>
+                        <th>Kitap Adı</th>
+                        <th>Fiyat</th>
+                        <th>Stok</th>
+                        <th>Kategori</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var book in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(book.ImageURL))
+                                    {
+                                        <img src="@book.ImageURL" alt="img" style="width:40px;height:60px;object-fit:cover;" class="rounded" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Resim Yok</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@book.Title</div>
+                                    <div class="small text-muted">@book.AuthorName</div>
+                                </td>
+                                <td>@book.Price.ToString("C")</td>
+                                <td>
+                                    @if(book.StockQuantity < 5)
+                                    {
+                                        <span class="badge bg-danger">@book.StockQuantity (Kritik)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">@book.StockQuantity</span>
+                                    }
+                                </td>
+                                <td>@book.CategoryName</td>
+                                <td>
+                                    <a href="/Seller/EditProduct/@book.BookID" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil-square"></i> Düzenle
+                                    </a>
+                                    <form action="/Seller/DeleteProduct/@book.BookID" method="post" class="d-inline" onsubmit="return confirm('Silmek istediğinize emin misiniz?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Sil
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <span class="text-muted">Henüz hiç ürün eklemediniz.</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

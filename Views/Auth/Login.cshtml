@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Sign In - kitapyurdu";
+}
+
+<div class="row min-vh-100 align-items-center justify-content-center py-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="text-center mb-5 animate__animated animate__fadeIn">
+            <h1 class="display-font fw-bold">Welcome Back<span class="text-accent">.</span></h1>
+            <p class="text-muted">Enter your credentials to access your library.</p>
+        </div>
+
+        <div class="book-card p-5 animate__animated animate__zoomIn" style="border-radius: 20px;">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger border-0 shadow-soft rounded-pill px-4 small mb-4">
+                    <i class="bi bi-exclamation-circle me-2"></i> @ViewBag.Error
+                </div>
+            }
+
+            <form method="post" action="/Auth/Login">
+                <div class="mb-4">
+                    <label for="username" class="form-label small fw-bold text-uppercase letter-spacing-1 opacity-50">Username</label>
+                    <div class="search-container d-flex align-items-center py-2 px-3">
+                        <i class="bi bi-person text-muted"></i>
+                        <input type="text" class="form-control search-input ps-2" id="username" name="username" placeholder="johndoe" required>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label small fw-bold text-uppercase letter-spacing-1 opacity-50">Password</label>
+                    <div class="search-container d-flex align-items-center py-2 px-3">
+                        <i class="bi bi-key text-muted"></i>
+                        <input type="password" class="form-control search-input ps-2" id="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input shadow-none" id="rememberMe" name="rememberMe" value="true">
+                        <label class="form-check-label text-muted small" for="rememberMe">Remember me</label>
+                    </div>
+                    <a href="#" class="text-accent small text-decoration-none fw-bold">Forgot?</a>
+                </div>
+
+                <div class="d-grid gap-3 pt-2">
+                    <button type="submit" class="btn-premium py-3">Sign In</button>
+                    <a href="/Auth/Register" class="btn btn-link text-muted small text-decoration-none mt-2">
+                        Don't have an account? <span class="text-dark fw-bold border-bottom border-dark border-2">Register</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="text-center mt-5 opacity-50">
+            <p class="small letter-spacing-1 mb-0">&copy; 2025 PREMIUM KITAPYURDU</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .letter-spacing-1 { letter-spacing: 1px; }
+</style>
+
+
+
+
+

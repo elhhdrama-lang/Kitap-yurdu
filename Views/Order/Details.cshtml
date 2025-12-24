@@ -1,0 +1,132 @@
+@model Order
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+}
+
+<div class="container py-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col-6">
+            <a href="/Order" class="btn btn-glass btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Siparişlerime Dön
+            </a>
+        </div>
+        <div class="col-6 text-end">
+            <span class="text-muted small">Sipariş No: <strong>#@Model.OrderID</strong></span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sipariş Durumu ve Detayları -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-soft rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="display-font mb-0">Sipariş Özeti</h4>
+                        <span class="badge rounded-pill py-2 px-3 @(Model.Status == "Pending" ? "bg-warning-subtle text-warning" : Model.Status == "Completed" ? "bg-success-subtle text-success" : "bg-light text-muted") shadow-none border">
+                            <i class="bi bi-dot me-1"></i>
+                            @(Model.Status == "Pending" ? "Hazırlanıyor" : Model.Status == "Completed" ? "Teslim Edildi" : Model.Status)
+                        </span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle">
+                            <thead class="bg-light-subtle">
+                                <tr>
+                                    <th class="small fw-bold text-uppercase text-muted py-3">Ürün</th>
+                                    <th class="small fw-bold text-uppercase text-muted py-3 text-center">Adet</th>
+                                    <th class="small fw-bold text-uppercase text-muted py-3 text-end">Birim Fiyat</th>
+                                    <th class="small fw-bold text-uppercase text-muted py-3 text-end">Toplam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detail in Model.OrderDetails)
+                                {
+                                    <tr class="border-bottom">
+                                        <td class="py-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="bg-dark rounded p-2 text-center" style="width: 50px; height: 70px;">
+                                                    <i class="bi bi-book text-white opacity-50"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-1 font-outfit fw-bold">@detail.BookTitle</h6>
+                                                    <small class="text-muted">Kitap Ürünü</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">@detail.Quantity</td>
+                                        <td class="text-end">@detail.UnitPrice.ToString("C")</td>
+                                        <td class="text-end fw-bold">@detail.SubTotal.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row justify-content-end mt-4">
+                        <div class="col-md-5">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Ara Toplam</span>
+                                <span>@Model.TotalAmount.ToString("C")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Kargo</span>
+                                <span class="text-success fw-bold">Ücretsiz</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 mb-0 display-font">Toplam Tutar</span>
+                                <span class="h4 mb-0 text-accent fw-bold">@Model.TotalAmount.ToString("C")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teslimat ve Kargo Bilgileri -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-soft rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="small fw-bold text-uppercase mb-3 text-muted border-bottom pb-2">Teslimat Adresi</h6>
+                    <p class="mb-4 small">
+                        <i class="bi bi-geo-alt-fill text-accent me-2"></i>
+                        @Model.ShippingAddress
+                    </p>
+
+                    <h6 class="small fw-bold text-uppercase mb-3 text-muted border-bottom pb-2">Kargo Bilgisi</h6>
+                    @if (!string.IsNullOrEmpty(Model.TrackingNumber))
+                    {
+                        <div class="bg-light p-3 rounded-3 mb-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-truck text-dark"></i>
+                                <span class="fw-bold small">Takip No: @Model.TrackingNumber</span>
+                            </div>
+                            <small class="text-muted d-block">@Model.ShippingInfo</small>
+                        </div>
+                        <button class="btn btn-dark w-100 btn-sm rounded-pill">Kargom Nerede?</button>
+                    }
+                    else
+                    {
+                        <div class="text-center py-3 opacity-50">
+                            <i class="bi bi-hourglass-split display-6 d-block mb-2"></i>
+                            <small>Kargo bilgisi bekleniyor...</small>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-soft rounded-4 bg-dark text-white">
+                <div class="card-body p-4 text-center">
+                    <i class="bi bi-patch-check fs-1 text-accent mb-2 d-block"></i>
+                    <h6>Garanti & Destek</h6>
+                    <p class="small text-muted mb-0">Herhangi bir sorunuz için destek ekibimize 7/24 ulaşabilirsiniz.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

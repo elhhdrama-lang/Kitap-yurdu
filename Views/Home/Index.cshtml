@@ -1,0 +1,125 @@
+@model List<Book>
+@{
+    ViewData["Title"] = "Luxury Reading Experience";
+    var bestSelling = ViewBag.BestSelling as List<Book> ?? new List<Book>();
+}
+
+<!-- Cinematic Hero Section -->
+<div class="hero-wrapper text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <span class="badge-premium mb-3 d-inline-block animate__animated animate__fadeInDown">Koleksiyon 2025</span>
+                <h1 class="hero-title animate__animated animate__fadeInUp">
+                    Bir Sonraki Edebiyat<br>Başyapıtınızı Keşfedin
+                </h1>
+                <p class="lead mb-5 opacity-75 animate__animated animate__fadeInUp" style="font-weight: 300; letter-spacing: 0.5px;">
+                    Zamansız klasiklerin ve modern temel eserlerin özenle seçilmiş koleksiyonu.
+                </p>
+                <div class="d-flex justify-content-center gap-3 animate__animated animate__fadeInUp">
+                    <a href="#all-books" class="btn-premium">Koleksiyonu Keşfet</a>
+                    <a href="/Home/Search" class="btn btn-outline-light rounded-pill px-5 py-2 border-2" style="font-weight: 600;">Yeni Gelenler</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Section -->
+<div class="container mb-5 mt-n5 position-relative" style="z-index: 10;">
+    <div class="row g-4 justify-content-center">
+        @foreach (var book in bestSelling.Take(3))
+        {
+            <div class="col-md-4 col-lg-3">
+                <div class="book-card border-0">
+                    <div class="card-img-wrapper">
+                        <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "https://via.placeholder.com/300x450?text=Book" : book.ImageURL)" 
+                             class="card-img-top" alt="@book.Title">
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="container my-5 pt-5" id="all-books">
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <h2 class="display-font h1 mb-0">Hepsini Keşfet</h2>
+            <p class="text-muted small text-uppercase fw-bold letter-spacing-1">Handpicked for you</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-dark rounded-circle p-2" style="width: 40px; height: 40px;"><i class="bi bi-chevron-left"></i></button>
+            <button class="btn btn-outline-dark rounded-circle p-2" style="width: 40px; height: 40px;"><i class="bi bi-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Premium Book Grid -->
+    <div class="row g-5">
+        @foreach (var book in Model)
+        {
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="book-card p-0 d-flex flex-column h-100">
+                    <div class="card-img-wrapper">
+                        <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "https://via.placeholder.com/300x450?text=No+Image" : book.ImageURL)" 
+                             class="card-img-top" alt="@book.Title">
+                        <div class="hover-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center opacity-0 transition-300">
+                             <a href="/Book/Details/@book.BookID" class="btn btn-light rounded-circle p-3 shadow"><i class="bi bi-eye"></i></a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 flex-grow-1 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge-premium py-1" style="font-size: 0.6rem;">@book.CategoryName</span>
+                            @if (book.AverageRating > 0)
+                            {
+                                <div class="text-warning small" style="font-size: 0.7rem;">
+                                    <i class="bi bi-star-fill"></i> @book.AverageRating.ToString("F1")
+                                </div>
+                            }
+                        </div>
+                        <h6 class="display-font fw-bold mb-1 text-truncate" title="@book.Title">@book.Title</h6>
+                        <small class="text-muted mb-3">@book.AuthorName</small>
+                        <div class="mt-auto d-flex align-items-center justify-content-between pt-3 border-top">
+                            <div class="fw-bold text-dark h5 mb-0">@book.Price.ToString("C")</div>
+                            <button type="button" class="btn btn-link text-dark p-0" onclick="addToHomePageCart(@book.BookID)">
+                                <i class="bi bi-plus-circle fs-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <div class="text-center mt-5 pt-5">
+        <a href="/Home/Search" class="btn btn-dark btn-lg px-5 py-3 rounded-pill transition" style="font-size: 0.9rem; font-weight: 600;">Daha Fazla Keşfet</a>
+    </div>
+</div>
+
+<style>
+    .mt-n5 { margin-top: -8rem !important; }
+    .letter-spacing-1 { letter-spacing: 1.5px; }
+    .transition-300 { transition: all 0.3s ease; }
+    .book-card:hover .hover-overlay { opacity: 1 !important; background: rgba(15, 23, 42, 0.4); }
+</style>
+
+<script>
+    function addToHomePageCart(bookId) {
+        fetch('/Cart/Add?bookId=' + bookId + '&quantity=1', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message);
+                if (typeof updateCartBadge === 'function') {
+                    updateCartBadge(data.cartCount);
+                }
+            } else {
+                showNotification(data.message || 'Bir hata oluştu.', 'error');
+            }
+        });
+    }
+</script>
+

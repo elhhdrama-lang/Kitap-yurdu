@@ -1,0 +1,96 @@
+@model Book
+@{
+    ViewData["Title"] = "Ürün Ekle";
+    Layout = "~/Views/Shared/_LayoutSeller.cshtml";
+    var authors = ViewBag.Authors as List<WebKitapyurdu.Models.Author>;
+    var categories = ViewBag.Categories as List<WebKitapyurdu.Models.Category>;
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h4 class="mb-0">Yeni Ürün Ekle</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="AddProduct" method="post">
+            <div class="row g-3">
+                <div class="col-md-12">
+                     <label class="form-label">Kitap Başlığı</label>
+                     <input type="text" class="form-control" name="Title" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Yazar</label>
+                    <select class="form-select" name="AuthorID" required>
+                        <option value="">Seçiniz...</option>
+                        @if(authors != null)
+                        {
+                            foreach (var author in authors)
+                            {
+                                <option value="@author.AuthorID">@author.FullName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                     <label class="form-label">Kategori</label>
+                     <select class="form-select" name="CategoryID" required>
+                        <option value="">Seçiniz...</option>
+                        @if(categories != null)
+                        {
+                            foreach (var category in categories)
+                            {
+                                <option value="@category.CategoryID">@category.CategoryName</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                     <label class="form-label">Yayınevi</label>
+                     <input type="text" class="form-control" name="Publisher">
+                </div>
+                 <div class="col-md-6">
+                     <label class="form-label">Sayfa Sayısı</label>
+                     <input type="number" class="form-control" name="PageCount">
+                </div>
+
+                <div class="col-md-4">
+                     <label class="form-label">Fiyat (TL)</label>
+                     <input type="number" step="0.01" class="form-control" name="Price" required>
+                </div>
+                <div class="col-md-4">
+                     <label class="form-label">Stok</label>
+                     <input type="number" class="form-control" name="StockQuantity" required>
+                </div>
+                 <div class="col-md-4">
+                     <label class="form-label">Dil</label>
+                     <input type="text" class="form-control" name="Language" value="Türkçe">
+                </div>
+
+                <div class="col-md-6">
+                     <label class="form-label">ISBN</label>
+                     <input type="text" class="form-control" name="ISBN">
+                </div>
+                <div class="col-md-6">
+                     <label class="form-label">Resim URL</label>
+                     <input type="url" class="form-control" name="ImageURL" placeholder="https://...">
+                </div>
+
+                <div class="col-12">
+                     <label class="form-label">Açıklama</label>
+                     <textarea class="form-control" name="Description" rows="4"></textarea>
+                </div>
+                
+                 <div class="col-md-4">
+                     <label class="form-label">Yayın Tarihi</label>
+                     <input type="date" class="form-control" name="PublishedDate">
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary px-4">Kaydet</button>
+                    <a href="/Seller/MyProducts" class="btn btn-secondary px-4">İptal</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

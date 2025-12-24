@@ -1,0 +1,156 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var stats = (ViewBag.Stats as IDictionary<string, object>) ?? new Dictionary<string, object>();
+    
+    // Helper to safety get values
+    object GetStat(string key) => stats.ContainsKey(key) ? stats[key] : 0;
+}
+
+<div class="admin-container py-5">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-5">
+            <div>
+                <h1 class="display-font fw-bold mb-1">Yönetim Paneli</h1>
+                <p class="text-muted mb-0">Sitenin genel durumunu ve istatistiklerini buradan takip edebilirsiniz.</p>
+            </div>
+            <div class="date-badge bg-white shadow-sm px-4 py-2 rounded-pill">
+                <i class="bi bi-calendar3 me-2 text-primary"></i>
+                <span class="fw-bold">@DateTime.Now.ToString("dd MMMM yyyy")</span>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card p-4 rounded-4 shadow-sm h-100 border-0 bg-white transition-300">
+                    <div class="icon-wrapper mb-3 text-primary bg-primary bg-opacity-10 rounded-3 d-inline-flex p-3">
+                        <i class="bi bi-book fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">@GetStat("TotalBooks")</h3>
+                    <p class="text-muted small mb-0">Toplam Kitap</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card p-4 rounded-4 shadow-sm h-100 border-0 bg-white transition-300">
+                    <div class="icon-wrapper mb-3 text-success bg-success bg-opacity-10 rounded-3 d-inline-flex p-3">
+                        <i class="bi bi-people fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">@GetStat("TotalCustomers")</h3>
+                    <p class="text-muted small mb-0">Müşteriler</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card p-4 rounded-4 shadow-sm h-100 border-0 bg-white transition-300">
+                    <div class="icon-wrapper mb-3 text-info bg-info bg-opacity-10 rounded-3 d-inline-flex p-3">
+                        <i class="bi bi-shop fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">@GetStat("TotalSellers")</h3>
+                    <p class="text-muted small mb-0">Satıcılar</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card p-4 rounded-4 shadow-sm h-100 border-0 bg-white transition-300">
+                    <div class="icon-wrapper mb-3 text-warning bg-warning bg-opacity-10 rounded-3 d-inline-flex p-3">
+                        <i class="bi bi-cart-check fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">@GetStat("TotalOrders")</h3>
+                    <p class="text-muted small mb-0">Siparişler</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card p-4 rounded-4 shadow-sm h-100 border-0 bg-white transition-300">
+                    <div class="icon-wrapper mb-3 text-danger bg-danger bg-opacity-10 rounded-3 d-inline-flex p-3">
+                        <i class="bi bi-currency-dollar fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">@(((decimal)GetStat("TotalRevenue")).ToString("C"))</h3>
+                    <p class="text-muted small mb-0">Toplam Kazanç</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="stat-card p-4 rounded-4 shadow-sm h-100 border-0 bg-white transition-300 shadow-highlight border-start border-4 border-warning">
+                    <div class="icon-wrapper mb-3 text-warning">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1 text-warning">@GetStat("PendingOrders")</h3>
+                    <p class="text-muted small mb-0">Bekleyenler</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Links -->
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <a href="/Admin/Users" class="admin-menu-item p-4 rounded-4 shadow-sm bg-white d-block text-decoration-none transition-300">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
+                            <i class="bi bi-person-gear fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Kullanıcı Yönetimi</h5>
+                            <small class="text-muted">Müşteri hesaplarını yönet</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="/Admin/Sellers" class="admin-menu-item p-4 rounded-4 shadow-sm bg-white d-block text-decoration-none transition-300">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle bg-info bg-opacity-10 text-info p-3 rounded-circle me-3">
+                            <i class="bi bi-shop-window fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Satıcı Yönetimi</h5>
+                            <small class="text-muted">Mağaza ve satıcı onayı</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="/Admin/Orders" class="admin-menu-item p-4 rounded-4 shadow-sm bg-white d-block text-decoration-none transition-300">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle bg-warning bg-opacity-10 text-warning p-3 rounded-circle me-3">
+                            <i class="bi bi-receipt fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Sipariş Takibi</h5>
+                            <small class="text-muted">Tüm siparişlerin durumu</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="/Admin/Reviews" class="admin-menu-item p-4 rounded-4 shadow-sm bg-white d-block text-decoration-none transition-300">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle bg-danger bg-opacity-10 text-danger p-3 rounded-circle me-3">
+                            <i class="bi bi-chat-quote fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Yorum Denetimi</h5>
+                            <small class="text-muted">Kitap yorumlarını incele</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-container {
+        background-color: #f8fafc;
+        min-height: 80vh;
+    }
+    .stat-card:hover, .admin-menu-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+    }
+    .transition-300 {
+        transition: all 0.3s ease;
+    }
+    .shadow-highlight {
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.1) !important;
+    }
+    .display-font {
+        font-family: 'Outfit', sans-serif;
+    }
+</style>

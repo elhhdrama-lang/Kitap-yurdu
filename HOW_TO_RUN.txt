@@ -1,0 +1,166 @@
+================================================================================
+WEB KİTAPYURDU - ÇALIŞTIRMA KILAVUZU
+================================================================================
+
+ADIM 1: GEREKSİNİMLERİ KONTROL EDİN
+-----------------------------------
+✓ Microsoft SQL Server (2019 veya üzeri) yüklü ve çalışıyor olmalı
+✓ .NET 8.0 SDK yüklü olmalı
+  - Kontrol için: dotnet --version (8.0.x görünmeli)
+
+ADIM 2: VERİTABANI KURULUMU
+---------------------------
+1. SQL Server Management Studio (SSMS) veya Azure Data Studio'yu açın
+
+2. SQL Server'a bağlanın (Windows Authentication veya SQL Authentication)
+
+3. Database klasöründeki SQL script dosyalarını SIRASIYLA çalıştırın:
+
+   a) CreateDatabase.sql
+      → Veritabanı ve tüm tabloları oluşturur
+   
+   b) StoredProcedures.sql
+      → 5 adet Stored Procedure oluşturur
+   
+   c) Triggers.sql
+      → 4 adet Trigger oluşturur
+   
+   d) Views.sql
+      → 1 adet View oluşturur
+   
+   e) Functions.sql
+      → 3+ adet Function oluşturur
+   
+   f) InsertSampleData.sql (OPSİYONEL)
+      → Örnek veriler ekler (test için)
+
+4. Veritabanının oluşturulduğunu kontrol edin:
+   - Object Explorer'da "KitapyurduDB" veritabanını görmelisiniz
+
+ADIM 3: BAĞLANTI STRING'İNİ AYARLAYIN
+--------------------------------------
+1. appsettings.json dosyasını açın
+
+2. ConnectionStrings bölümünü kendi SQL Server ayarlarınıza göre düzenleyin:
+
+   Windows Authentication için:
+   "Server=localhost;Database=KitapyurduDB;Integrated Security=True;TrustServerCertificate=True;"
+
+   SQL Authentication için:
+   "Server=localhost;Database=KitapyurduDB;User Id=sa;Password=YourPassword;TrustServerCertificate=True;"
+
+   Farklı bir sunucu kullanıyorsanız:
+   "Server=SERVER_ADI;Database=KitapyurduDB;Integrated Security=True;TrustServerCertificate=True;"
+
+ADIM 4: PROJEYİ ÇALIŞTIRIN
+---------------------------
+
+YÖNTEM 1: Visual Studio ile
+----------------------------
+1. Visual Studio 2022'yi açın
+2. File > Open > Project/Solution
+3. WebKitapyurdu.csproj dosyasını seçin
+4. F5 tuşuna basın veya "Run" butonuna tıklayın
+5. Tarayıcı otomatik açılacaktır
+
+YÖNTEM 2: Visual Studio Code ile
+---------------------------------
+1. Visual Studio Code'u açın
+2. File > Open Folder
+3. kitapyurdu klasörünü seçin
+4. Terminal'i açın (Ctrl + `)
+5. Şu komutları çalıştırın:
+
+   dotnet restore
+   dotnet build
+   dotnet run
+
+6. Terminal'de görünen URL'yi tarayıcıda açın
+   (Genellikle: https://localhost:5001 veya http://localhost:5000)
+
+YÖNTEM 3: Komut Satırı (Terminal/CMD/PowerShell)
+--------------------------------------------------
+1. Proje klasörüne gidin:
+   cd C:\Users\Amar\Desktop\kitapyurdu
+
+2. NuGet paketlerini yükleyin:
+   dotnet restore
+
+3. Projeyi derleyin:
+   dotnet build
+
+4. Projeyi çalıştırın:
+   dotnet run
+
+5. Terminal'de görünen URL'yi tarayıcıda açın
+   Örnek çıktı:
+   Now listening on: https://localhost:5001
+   Now listening on: http://localhost:5000
+
+ADIM 5: UYGULAMAYI KULLANIN
+----------------------------
+1. Tarayıcıda uygulama açıldığında ana sayfayı göreceksiniz
+
+2. Test için giriş yapın:
+   - Sağ üstte "Giriş" butonuna tıklayın
+   - Eğer örnek veri eklediyseniz:
+     Kullanıcı Adı: testuser
+     Şifre: hashed_password_456
+   - Veya "Kayıt Ol" ile yeni hesap oluşturun
+
+3. Özellikler:
+   - Ana sayfada kitapları görüntüleyin
+   - Kitap detaylarına tıklayın
+   - Sepete ürün ekleyin
+   - Sipariş oluşturun
+   - Siparişlerinizi görüntüleyin
+
+SORUN GİDERME
+-------------
+
+HATA: "Cannot open database 'KitapyurduDB'"
+ÇÖZÜM: 
+- Veritabanı scriptlerini çalıştırdığınızdan emin olun
+- SQL Server'ın çalıştığını kontrol edin
+- Connection string'i kontrol edin
+
+HATA: "dotnet: command not found" veya "dotnet is not recognized"
+ÇÖZÜM:
+- .NET 8.0 SDK'nın yüklü olduğundan emin olun
+- https://dotnet.microsoft.com/download adresinden indirin
+- PATH değişkenine .NET SDK'yı ekleyin
+
+HATA: "Port already in use"
+ÇÖZÜM:
+- Program.cs dosyasında farklı bir port kullanın
+- Veya çalışan uygulamayı kapatın
+
+HATA: "Package restore failed"
+ÇÖZÜM:
+- İnternet bağlantınızı kontrol edin
+- dotnet restore komutunu tekrar çalıştırın
+- NuGet kaynaklarını kontrol edin
+
+HATA: Veritabanı bağlantı hatası
+ÇÖZÜM:
+- SQL Server'ın çalıştığını kontrol edin (Services.msc)
+- appsettings.json'daki connection string'i kontrol edin
+- SQL Server Authentication kullanıyorsanız kullanıcı adı/şifreyi kontrol edin
+- Firewall ayarlarını kontrol edin
+
+HIZLI BAŞLANGIÇ (Özet)
+-----------------------
+1. SQL Server'da Database scriptlerini çalıştır
+2. appsettings.json'da connection string'i ayarla
+3. Terminal'de: dotnet restore
+4. Terminal'de: dotnet run
+5. Tarayıcıda gösterilen URL'yi aç
+
+================================================================================
+İYİ ÇALIŞMALAR!
+================================================================================
+
+
+
+
+

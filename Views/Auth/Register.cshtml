@@ -1,0 +1,94 @@
+@model User
+@{
+    ViewData["Title"] = "Join the Club - kitapyurdu";
+}
+
+<div class="row min-vh-100 align-items-center justify-content-center py-5">
+    <div class="col-md-9 col-lg-7 col-xl-6">
+        <div class="text-center mb-5 animate__animated animate__fadeIn">
+            <h1 class="display-font fw-bold">Begin Your Journey<span class="text-accent">.</span></h1>
+            <p class="text-muted">Join our exclusive community of book enthusiasts.</p>
+        </div>
+
+        <div class="book-card p-5 animate__animated animate__zoomIn" style="border-radius: 20px;">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger border-0 shadow-soft rounded-pill px-4 small mb-4">
+                    <i class="bi bi-exclamation-circle me-2"></i> @ViewBag.Error
+                </div>
+            }
+
+            <form method="post" action="/Auth/Register">
+                <div class="row g-4">
+                    <div class="col-sm-6">
+                        <label for="FirstName" class="form-label small fw-bold text-uppercase opacity-50">First Name</label>
+                        <div class="search-container d-flex align-items-center py-2 px-3">
+                            <input type="text" class="form-control search-input" id="FirstName" name="FirstName" placeholder="John">
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="LastName" class="form-label small fw-bold text-uppercase opacity-50">Last Name</label>
+                        <div class="search-container d-flex align-items-center py-2 px-3">
+                            <input type="text" class="form-control search-input" id="LastName" name="LastName" placeholder="Doe">
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label for="Username" class="form-label small fw-bold text-uppercase opacity-50">Username</label>
+                        <div class="search-container d-flex align-items-center py-2 px-3">
+                            <i class="bi bi-at text-muted me-2"></i>
+                            <input type="text" class="form-control search-input" id="Username" name="Username" placeholder="johndoe" required>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="Email" class="form-label small fw-bold text-uppercase opacity-50">Email Address</label>
+                        <div class="search-container d-flex align-items-center py-2 px-3">
+                            <i class="bi bi-envelope text-muted me-2"></i>
+                            <input type="email" class="form-control search-input" id="Email" name="Email" placeholder="john@example.com" required>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="Phone" class="form-label small fw-bold text-uppercase opacity-50">Phone Number</label>
+                        <div class="search-container d-flex align-items-center py-2 px-3">
+                            <i class="bi bi-phone text-muted me-2"></i>
+                            <input type="text" class="form-control search-input" id="Phone" name="Phone" placeholder="+1 234 567 89">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="PasswordHash" class="form-label small fw-bold text-uppercase opacity-50">Password</label>
+                        <div class="search-container d-flex align-items-center py-2 px-3">
+                            <i class="bi bi-lock text-muted me-2"></i>
+                            <input type="password" class="form-control search-input" id="PasswordHash" name="PasswordHash" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-text small opacity-50 mt-2">Minimum 6 refined characters.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="Address" class="form-label small fw-bold text-uppercase opacity-50">Delivery Address</label>
+                        <div class="search-container d-flex align-items-center py-2 px-3" style="border-radius: 15px;">
+                            <textarea class="form-control search-input bg-transparent border-0" id="Address" name="Address" rows="2" placeholder="Where should we send your treasures?"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-3 mt-5">
+                    <button type="submit" class="btn-premium py-3">Join Kitapyurdu</button>
+                    <a href="/Auth/Login" class="btn btn-link text-muted small text-decoration-none mt-2">
+                        Already a member? <span class="text-dark fw-bold border-bottom border-dark border-2">Sign In</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="text-center mt-5 opacity-50">
+            <p class="small letter-spacing-1 mb-0">&copy; 2025 THE LUXURY OF READING</p>
+        </div>
+    </div>
+</div>
+
+
+
+
+

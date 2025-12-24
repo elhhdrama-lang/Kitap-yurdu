@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Güvenli Ödeme";
+}
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Sol Kolon: Ödeme Formu -->
+        <div class="col-lg-7">
+            <div class="payment-card p-4 p-md-5">
+                <h2 class="display-font mb-4">Güvenli Ödeme</h2>
+                
+                <div class="visual-card mb-5">
+                    <div class="card-chip"></div>
+                    <div class="card-number-display" id="card-num-preview">**** **** **** ****</div>
+                    <div class="d-flex justify-content-between align-items-end">
+                        <div class="card-holder-display">
+                            <small class="d-block opacity-50 mb-1">KART SAHİBİ</small>
+                            <span id="card-name-preview">İSİM SOYİSİM</span>
+                        </div>
+                        <div class="card-expiry-display text-end">
+                            <small class="d-block opacity-50 mb-1">S.K.T</small>
+                            <span id="card-expiry-preview">MM/YY</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" action="/Payment/Process" id="paymentForm">
+                    <input type="hidden" name="shippingAddress" value="@ViewBag.ShippingAddress" />
+                    
+                    <div class="mb-4">
+                        <label for="cardName" class="form-label small fw-bold text-uppercase">Kart Üzerindeki İsim</label>
+                        <input type="text" class="form-control form-control-lg bg-light border-0" id="cardName" name="cardName" placeholder="AD SOYAD" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="cardNumber" class="form-label small fw-bold text-uppercase">Kart Numarası</label>
+                        <input type="text" class="form-control form-control-lg bg-light border-0" id="cardNumber" name="cardNumber" 
+                               placeholder="0000 0000 0000 0000" maxlength="19" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="expiryDate" class="form-label small fw-bold text-uppercase">Geçerlilik Tarihi</label>
+                            <input type="text" class="form-control form-control-lg bg-light border-0" id="expiryDate" name="expiryDate" 
+                                   placeholder="AA/YY" maxlength="5" required>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="cvv" class="form-label small fw-bold text-uppercase">CVV / CVC</label>
+                            <input type="text" class="form-control form-control-lg bg-light border-0" id="cvv" name="cvv" 
+                                   placeholder="123" maxlength="3" required>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-premium d-flex align-items-center mb-4" style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2);">
+                        <i class="bi bi-shield-lock-fill text-accent fs-4 me-3"></i>
+                        <small class="text-muted">Ödemeniz 256-bit SSL ile korunmaktadır. Bu bir simülasyondur, gerçek kart verisi kaydedilmez.</small>
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-premium btn-lg py-3">
+                            <i class="bi bi-lock-fill me-2"></i> Ödemeyi Güvenle Tamamla
+                        </button>
+                        <a href="/Cart" class="btn btn-glass btn-lg py-3">İptal Et ve Geri Dön</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sağ Kolon: Sipariş Özeti -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-soft rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white p-4">
+                    <h5 class="mb-0">Sipariş Özeti</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Ara Toplam</span>
+                        <span class="fw-bold">@ViewBag.Total.ToString("C")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                        <span class="text-muted">Kargo</span>
+                        <span class="text-success fw-bold">Ücretsiz</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="h5 mb-0">Toplam Tutar</span>
+                        <span class="h5 mb-0 text-accent">@ViewBag.Total.ToString("C")</span>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 mb-4">
+                        <h6 class="small fw-bold text-uppercase mb-2 text-muted">Aydınlatma Metni</h6>
+                        <p class="small text-muted mb-0">6698 sayılı KVKK kapsamında verileriniz işlenmektedir. Satın al butonuna basarak Mesafeli Satış Sözleşmesini kabul etmiş sayılırsınız.</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ViewBag.ShippingAddress as string))
+                    {
+                        <div class="p-3 border rounded-3 border-dashed">
+                            <h6 class="small fw-bold text-uppercase mb-2 text-muted"><i class="bi bi-geo-alt me-1"></i> Teslimat Adresi</h6>
+                            <p class="small mb-0">@ViewBag.ShippingAddress</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <img src="https://www.visa.com.tr/dam/VCOM/regional/ve/turkey/in-page-images/visa-logo-800x450.jpg" alt="Visa" style="height: 30px; opacity: 0.5;" class="me-3">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="Mastercard" style="height: 30px; opacity: 0.5;">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Real-time Visual Card Update
+        const cardNumInput = document.getElementById('cardNumber');
+        const cardNumPreview = document.getElementById('card-num-preview');
+        const cardNameInput = document.getElementById('cardName');
+        const cardNamePreview = document.getElementById('card-name-preview');
+        const cardExpiryInput = document.getElementById('expiryDate');
+        const cardExpiryPreview = document.getElementById('card-expiry-preview');
+
+        cardNumInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formatted;
+            cardNumPreview.textContent = formatted || '**** **** **** ****';
+        });
+
+        cardNameInput.addEventListener('input', function(e) {
+            cardNamePreview.textContent = e.target.value.toUpperCase() || 'İSİM SOYİSİM';
+        });
+
+        cardExpiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+            cardExpiryPreview.textContent = value || 'MM/YY';
+        });
+
+        // CVV validation
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Simple form validation animation
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> İşleniyor...';
+            btn.disabled = true;
+        });
+    </script>
+}
+

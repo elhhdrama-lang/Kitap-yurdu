@@ -1,0 +1,90 @@
+@model List<Review>
+@{
+    ViewData["Title"] = "Yorum Denetimi";
+}
+
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/Admin/Dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Yorumlar</li>
+                </ol>
+            </nav>
+            <h1 class="display-font fw-bold">Yorum Denetimi</h1>
+        </div>
+    </div>
+
+    <div class="row g-4" id="reviewsContainer">
+        @foreach (var review in Model)
+        {
+            <div class="col-md-6 col-lg-4 review-card-wrapper" id="review_@review.ReviewID">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-2 fw-bold" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                @review.Username.Substring(0,1).ToUpper()
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">@review.Username</h6>
+                                <small class="text-muted">@review.ReviewDate.ToString("dd.MM.yyyy")</small>
+                            </div>
+                        </div>
+                        <div class="text-warning">
+                            @for(int i=0; i<5; i++) {
+                                <i class="bi bi-star@(i < review.Rating ? "-fill" : "")"></i>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-uppercase fw-bold text-primary" style="font-size: 0.65rem; letter-spacing: 0.5px;">Kitap:</small>
+                        <h6 class="mb-2 text-dark text-truncate">@review.BookTitle</h6>
+                        <p class="text-muted small mb-0" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            "@review.Comment"
+                        </p>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-end">
+                        <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteReview(@review.ReviewID)">
+                            <i class="bi bi-trash3 me-1"></i> Sil
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function deleteReview(reviewId) {
+        if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+
+        const formData = new URLSearchParams();
+        formData.append('reviewId', reviewId);
+
+        fetch('/Admin/DeleteReview', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const card = document.getElementById(`review_${reviewId}`);
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => card.remove(), 300);
+                showNotification("Yorum başarıyla silindi.");
+            } else {
+                showNotification("Bir hata oluştu.", "error");
+            }
+        });
+    }
+</script>
+
+<style>
+    .review-card-wrapper {
+        transition: all 0.3s ease;
+    }
+</style>

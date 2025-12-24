@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - kitapyurdu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="~/css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-glass py-1">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    kitapyurdu<span class="text-accent">.</span>
+                </a>
+                
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto gap-1">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Keşfet</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#all-books">Koleksiyon</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#best-sellers">Çok Satanlar</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="d-flex align-items-center gap-4">
+                        <!-- Modern Search -->
+                        <form class="d-none d-lg-block" method="get" action="/Home/Search">
+                            <div class="search-container d-flex align-items-center">
+                                <i class="bi bi-search text-muted small"></i>
+                                <input class="form-control search-input bg-transparent border-0 ps-2" type="search" name="query" placeholder="Başyapıt ara..." aria-label="Search" style="font-size: 0.9rem; width: 180px;">
+                            </div>
+                        </form>
+
+                        <ul class="navbar-nav ms-auto align-items-center gap-3">
+                            @if (Context.Session.GetInt32("UserID") != null)
+                            {
+                                <a href="/Favorite" class="text-reset opacity-75 hover-opacity-100"><i class="bi bi-heart fs-5"></i></a>
+                                <a href="/Cart" class="text-reset position-relative opacity-75 hover-opacity-100">
+                                    <i class="bi bi-bag fs-5"></i>
+                                    <span id="cartBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark" style="font-size: 0.55rem; display: none;">0</span>
+                                </a>
+                                <div class="dropdown">
+                                    <a href="#" class="text-reset dropdown-toggle no-caret" data-bs-toggle="dropdown">
+                                        <div class="avatar-sm bg-dark text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                            @Context.Session.GetString("Username")?[0]
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-heavy mt-2">
+                                        <li><span class="dropdown-header fw-bold">@Context.Session.GetString("Username")</span></li>
+                                        <li><a class="dropdown-item py-2" href="/Order"><i class="bi bi-receipt me-2"></i>Orders</a></li>
+                                        @if (Context.Session.GetString("Role") == "Admin")
+                                        {
+                                            <li><a class="dropdown-item py-2 fw-bold text-primary" href="/Admin/Dashboard"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+                                            <li><hr class="dropdown-divider opacity-50"></li>
+                                        }
+                                        @if (Context.Session.GetString("Role") == "Seller")
+                                        {
+                                            <li><a class="dropdown-item py-2" href="/Seller/Dashboard"><i class="bi bi-grid me-2"></i>Seller Panel</a></li>
+                                        }
+                                        <li><hr class="dropdown-divider opacity-50"></li>
+                                        <li><a class="dropdown-item py-2 text-danger" href="/Auth/Logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                    </ul>
+                                </div>
+                            }
+                            else
+                            {
+                                <a href="/Auth/Login" class="btn btn-premium btn-sm py-2 px-4">Sign In</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @if (TempData["Error"] != null)
+        {
+            <div class="container mt-4">
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-soft" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="container mt-4">
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-soft" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="luxury-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="text-white mb-3">kitapyurdu<span class="text-accent">.</span></h5>
+                    <p class="small pe-lg-5">Curating the world's finest literature for those who seek depth, beauty, and wisdom in every page.</p>
+                </div>
+                <div class="col-6 col-lg-2 mb-4 mb-lg-0">
+                    <h6 class="text-white mb-3 small text-uppercase fw-bold">Shop</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="/" class="footer-link">Bestsellers</a></li>
+                        <li><a href="/" class="footer-link">New Arrivals</a></li>
+                        <li><a href="/" class="footer-link">Categories</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6 class="text-white mb-3 small text-uppercase fw-bold">Support</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="/Home/Contact" class="footer-link">Contact Us</a></li>
+                        <li><a href="/" class="footer-link">Shipping</a></li>
+                        <li><a href="/Seller/Login" class="footer-link">Seller Center</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <h6 class="text-white mb-3 small text-uppercase fw-bold">Follow Us</h6>
+                    <div class="d-flex gap-3 justify-content-lg-end">
+                        <a href="#" class="footer-link fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="footer-link fs-5"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="footer-link fs-5"><i class="bi bi-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-top border-secondary mt-5 pt-4 text-center">
+                <p class="small mb-0">&copy; 2025 KITAPYURDU. ALL RIGHTS RESERVED.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
+        <div id="liveToast" class="toast border-0 shadow-heavy" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <i id="toastIcon" class="bi bi-info-circle fs-5"></i>
+                    <span id="toastMessage"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global Notification System
+        function showNotification(message, type = 'success') {
+            const toastEl = document.getElementById('liveToast');
+            const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+            const icon = document.getElementById('toastIcon');
+            const messageEl = document.getElementById('toastMessage');
+            
+            toastEl.className = 'toast border-0 shadow-heavy text-white';
+            if (type === 'success') {
+                toastEl.classList.add('bg-dark');
+                icon.className = 'bi bi-check-circle-fill text-accent fs-5';
+            } else {
+                toastEl.classList.add('bg-danger');
+                icon.className = 'bi bi-exclamation-circle-fill fs-5';
+            }
+            
+            messageEl.textContent = message;
+            toast.show();
+        }
+
+        function updateCartBadge(count = null) {
+            const badge = document.getElementById('cartBadge');
+            if (count !== null) {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'inline';
+                    badge.classList.add('animate__animated', 'animate__bounceIn');
+                    setTimeout(() => badge.classList.remove('animate__bounceIn'), 1000);
+                } else {
+                    badge.style.display = 'none';
+                }
+                return;
+            }
+
+            @if (Context.Session.GetInt32("UserID") != null)
+            {
+                <text>
+                fetch('/Cart/GetCount')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'inline';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    });
+                </text>
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateCartBadge);
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+
+
+
+

@@ -1,0 +1,113 @@
+================================================================================
+HIZLI ÇÖZÜM - VERİTABANI HATASI
+================================================================================
+
+SORUN: Veritabanı henüz oluşturulmamış!
+
+ADIM ADIM ÇÖZÜM:
+================
+
+ADIM 1: SQL Server'ın Yüklü Olduğunu Kontrol Edin
+---------------------------------------------------
+1. Windows tuşuna basın, "SQL Server" yazın
+2. Eğer "SQL Server Management Studio" veya "SQL Server" görünüyorsa yüklüdür
+3. Eğer görünmüyorsa, SQL Server Express'i indirmeniz gerekir:
+   https://www.microsoft.com/en-us/sql-server/sql-server-downloads
+
+ADIM 2: SQL Server Management Studio (SSMS) Açın
+--------------------------------------------------
+1. SSMS'i açın (eğer yoksa indirin: https://aka.ms/ssmsfullsetup)
+2. "Connect to Server" penceresi açılacak
+3. Server name: localhost veya . (nokta) yazın
+4. Authentication: Windows Authentication
+5. Connect butonuna tıklayın
+
+ADIM 3: Veritabanı Script'ini Çalıştırın
+-----------------------------------------
+1. SSMS'de sol üstte "New Query" butonuna tıklayın (veya Ctrl+N)
+2. Proje klasörünüzdeki Database/SetupDatabase.sql dosyasını açın
+3. İçeriğini kopyalayın (Ctrl+A, Ctrl+C)
+4. SSMS'deki Query penceresine yapıştırın (Ctrl+V)
+5. Execute butonuna tıklayın (veya F5 tuşuna basın)
+6. Alt kısımda "Command(s) completed successfully" mesajını görmelisiniz
+
+ADIM 4: Diğer Script Dosyalarını Çalıştırın
+--------------------------------------------
+Aynı şekilde, sırasıyla şu dosyaları çalıştırın:
+1. Database/StoredProcedures.sql
+2. Database/Triggers.sql
+3. Database/Views.sql
+4. Database/Functions.sql
+5. Database/InsertSampleData.sql (opsiyonel - test verileri için)
+
+ADIM 5: Veritabanının Oluşturulduğunu Kontrol Edin
+---------------------------------------------------
+1. SSMS'de sol tarafta "Object Explorer" panelinde
+2. "Databases" klasörünü genişletin
+3. "KitapyurduDB" veritabanını görmelisiniz
+4. Eğer görmüyorsanız, "Databases" üzerine sağ tıklayıp "Refresh" yapın
+
+ADIM 6: Uygulamayı Tekrar Çalıştırın
+--------------------------------------
+1. Terminal'de uygulamayı durdurun (Ctrl+C)
+2. Tekrar çalıştırın: dotnet run
+3. Artık hata almamalısınız!
+
+================================================================================
+ALTERNATİF: SQL Server Yüklü Değilse
+================================================================================
+
+EĞER SQL SERVER YÜKLÜ DEĞİLSE:
+
+Seçenek 1: SQL Server Express İndirin (ÜCRETSİZ)
+--------------------------------------------------
+1. https://www.microsoft.com/en-us/sql-server/sql-server-downloads
+2. "Express" versiyonunu indirin
+3. Kurulum sırasında "Mixed Mode Authentication" seçin
+4. Bir sa (system administrator) şifresi belirleyin
+5. Kurulumdan sonra SSMS'i indirin: https://aka.ms/ssmsfullsetup
+
+Seçenek 2: LocalDB Kullanın (Daha Basit)
+------------------------------------------
+1. .NET SDK ile birlikte LocalDB gelir
+2. appsettings.json'da connection string'i şu şekilde değiştirin:
+   "Server=(localdb)\\mssqllocaldb;Database=KitapyurduDB;Trusted_Connection=True;TrustServerCertificate=True;"
+3. Sonra script'leri çalıştırın
+
+================================================================================
+HIZLI TEST
+================================================================================
+
+SSMS'de şu sorguyu çalıştırın:
+SELECT name FROM sys.databases WHERE name = 'KitapyurduDB';
+
+Eğer sonuç dönerse: ✓ Veritabanı oluşturulmuş
+Eğer sonuç dönmezse: ✗ Veritabanı henüz oluşturulmamış
+
+================================================================================
+SORUN GİDERME
+================================================================================
+
+SORUN: "Cannot connect to server"
+ÇÖZÜM: 
+- SQL Server servisinin çalıştığından emin olun
+- Services.msc'den "SQL Server (MSSQLSERVER)" servisini başlatın
+
+SORUN: "Login failed"
+ÇÖZÜM:
+- SSMS'de Security > Logins > New Login
+- Windows kullanıcınızı ekleyin
+- Server roles: sysadmin verin
+
+SORUN: Script çalışmıyor
+ÇÖZÜM:
+- Script'i tek tek çalıştırmayı deneyin
+- Hata mesajlarını kontrol edin
+- GO komutlarının olduğundan emin olun
+
+================================================================================
+
+
+
+
+

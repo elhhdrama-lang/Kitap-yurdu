@@ -1,0 +1,124 @@
+@model List<Book>
+@{
+    var categories = ViewBag.Categories as List<Category> ?? new List<Category>();
+    var currentCategoryId = ViewBag.CurrentCategoryId as int? ?? 0;
+    var currentCategory = categories.FirstOrDefault(c => c.CategoryID == currentCategoryId);
+    ViewData["Title"] = (currentCategory?.CategoryName ?? "Kategori") + " - Collection 2025";
+}
+
+<div class="hero-wrapper pb-5" style="padding-top: 4rem; clip-path: none; margin-bottom: 0; min-height: 250px;">
+    <div class="container mt-5 text-center">
+        <span class="badge-premium mb-3 d-inline-block animate__animated animate__fadeInDown">Koleksiyon Keşfi</span>
+        <h1 class="hero-title animate__animated animate__fadeInUp">
+            @(currentCategory?.CategoryName ?? "Tüm Eserler")
+        </h1>
+    </div>
+</div>
+
+<div class="container my-5 pt-5">
+    <div class="row g-5">
+        <div class="col-lg-3">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="book-card p-4 border-0 mb-4 bg-white shadow-sm">
+                    <h5 class="display-font mb-4 border-bottom pb-2">Kategoriler</h5>
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var category in categories)
+                        {
+                            <a href="/Book/Category/@category.CategoryID" 
+                               class="text-decoration-none p-2 rounded transition-300 @(category.CategoryID == currentCategoryId ? "bg-dark text-white fw-bold" : "text-muted hover-bg-light")">
+                                @category.CategoryName
+                            </a>
+                        }
+                    </div>
+                </div>
+                
+                <div class="book-card p-4 border-0 bg-dark text-white">
+                    <h5 class="display-font text-accent mb-3">Kürasyon</h5>
+                    <p class="small opacity-75 mb-0" style="line-height: 1.6;">
+                        Bu kategorideki tüm eserler uzman küratörlerimiz tarafından özenle seçilmiştir.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            @if (Model.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var book in Model)
+                    {
+                        <div class="col-6 col-md-4">
+                            <div class="book-card p-0 d-flex flex-column h-100 shadow-sm border-0">
+                                <div class="card-img-wrapper">
+                                    <img src="@(string.IsNullOrEmpty(book.ImageURL) ? "https://via.placeholder.com/300x450?text=No+Image" : book.ImageURL)" 
+                                         class="card-img-top" alt="@book.Title">
+                                    <div class="hover-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center opacity-0 transition-300">
+                                         <a href="/Book/Details/@book.BookID" class="btn btn-light rounded-circle p-3 shadow"><i class="bi bi-eye"></i></a>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 flex-grow-1 d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge-premium py-1" style="font-size: 0.6rem;">@book.CategoryName</span>
+                                        @if (book.AverageRating > 0)
+                                        {
+                                            <div class="text-warning small" style="font-size: 0.7rem;">
+                                                <i class="bi bi-star-fill"></i> @book.AverageRating.ToString("F1")
+                                            </div>
+                                        }
+                                    </div>
+                                    <h6 class="display-font fw-bold mb-1 text-truncate" title="@book.Title">@book.Title</h6>
+                                    <small class="text-muted mb-3">@book.AuthorName</small>
+                                    <div class="mt-auto d-flex align-items-center justify-content-between pt-3 border-top">
+                                        <div class="fw-bold text-dark h5 mb-0">@book.Price.ToString("C")</div>
+                                        <button type="button" class="btn btn-link text-dark p-0" onclick="addToCart(@book.BookID)">
+                                            <i class="bi bi-plus-circle fs-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-journal-x fs-1 opacity-25 d-block mb-3"></i>
+                    <p class="text-muted">Bu kategoride henüz eser bulunmuyor.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-bg-light:hover { background-color: #f8f9fa; color: var(--brand-dark) !important; }
+    .transition-300 { transition: all 0.3s ease; }
+</style>
+
+@section Scripts {
+    <script>
+        function addToCart(bookId) {
+            fetch('/Cart/Add?bookId=' + bookId + '&quantity=1', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Ürün sepetinize eklendi.');
+                    if (typeof updateCartBadge === 'function') {
+                        updateCartBadge(data.cartCount);
+                    }
+                } else {
+                    showNotification(data.message || 'Bir hata oluştu.', 'error');
+                }
+            });
+        }
+    </script>
+}
+
+
+
+
+

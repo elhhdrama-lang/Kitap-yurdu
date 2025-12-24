@@ -1,0 +1,372 @@
+@model Book
+@{
+    ViewData["Title"] = $"{Model.Title} - Kitapyurdu";
+}
+
+<!-- Hero Section -->
+<div class="hero-wrapper pb-5" style="padding-top: 4rem; background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); margin-bottom: 0;">
+    <div class="container mt-5">
+        <div class="row align-items-center g-5">
+            <div class="col-md-5 col-lg-4 animate__animated animate__fadeInLeft">
+                <div class="book-cover-container shadow-lg overflow-hidden" style="border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageURL) ? "https://via.placeholder.com/400x600?text=Resim+Yok" : Model.ImageURL)" 
+                         class="img-fluid w-100" alt="@Model.Title" style="transition: transform 0.5s ease;">
+                </div>
+            </div>
+            <div class="col-md-7 col-lg-8 text-white animate__animated animate__fadeInRight">
+                <div class="category-badge mb-3">@Model.CategoryName</div>
+                <h1 class="display-4 fw-bold mb-2">@Model.Title</h1>
+                <p class="h4 text-warning mb-4">@Model.AuthorName</p>
+                
+                <div class="d-flex align-items-center gap-4 mb-4">
+                    <div class="price-tag">
+                        <span class="h2 fw-bold">@Model.Price.ToString("C")</span>
+                    </div>
+                    @if (Model.ReviewCount > 0)
+                    {
+                        <div class="d-flex align-items-center gap-2 border-start ps-4">
+                            <div class="text-warning">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="bi @(i <= Math.Round(Model.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                }
+                            </div>
+                            <span class="opacity-75">(@Model.AverageRating.ToString("F1"))</span>
+                            <span class="ms-2 small opacity-50">@Model.ReviewCount Değerlendirme</span>
+                        </div>
+                    }
+                </div>
+
+                <p class="lead opacity-75 mb-5 pe-lg-5" style="font-weight: 300; line-height: 1.6;">
+                    @(Model.Description != null && Model.Description.Length > 200 ? Model.Description.Substring(0, 197) + "..." : Model.Description ?? "Bu eser için henüz bir özet girilmemiş.")
+                </p>
+
+                <div class="d-flex gap-3">
+                    @if (Context.Session.GetInt32("UserID") != null)
+                    {
+                        @if (Model.StockQuantity > 0)
+                        {
+                            <button class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold" onclick="addToCart(@Model.BookID)">
+                                <i class="bi bi-cart-plus me-2"></i> Sepete Ekle
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary btn-lg rounded-pill px-5 py-3 disabled">Stokta Yok</button>
+                        }
+                        <button class="btn btn-outline-light btn-lg rounded-pill px-4" onclick="toggleFavorite(@Model.BookID)">
+                            <i class="bi @(ViewBag.IsFavorite ? "bi-heart-fill text-danger" : "bi-heart")"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <a href="/Auth/Login" class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold text-decoration-none">
+                            Satın Almak İçin Giriş Yapın
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <div class="col-lg-8">
+            <!-- Kitap Özeti -->
+            <section class="mb-5 p-4 bg-white rounded-4 shadow-sm">
+                <h3 class="fw-bold mb-4 pb-3 border-bottom">Kitap Özeti</h3>
+                <div class="description-text" style="line-height: 1.8; color: #444; font-size: 1.1rem;">
+                    @Html.Raw(Model.Description?.Replace("\n", "<br/>") ?? "Bu eser için açıklama bulunmamaktadır.")
+                </div>
+            </section>
+
+            <!-- Okur Değerlendirmeleri -->
+            <section class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold mb-0">Değerlendirmeler & Yorumlar</h3>
+                    @if (Context.Session.GetInt32("UserID") != null)
+                    {
+                        <button class="btn btn-dark rounded-pill px-4" type="button" data-bs-toggle="collapse" data-bs-target="#reviewFormCollapse">
+                            <i class="bi bi-pencil-square me-2"></i> Değerlendirme Yaz
+                        </button>
+                    }
+                </div>
+
+                <!-- Yorum Yapma Formu -->
+                <div class="collapse mb-5" id="reviewFormCollapse">
+                    <div class="card border-0 shadow-sm rounded-4 p-4">
+                        <h5 class="fw-bold mb-4">Bu Kitabı Değerlendirin</h5>
+                        <form id="reviewForm">
+                            <div class="mb-4 text-center">
+                                <label class="small fw-bold text-uppercase text-muted mb-3 d-block">Puan Verin</label>
+                                <div class="rating-stars h2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi bi-star star-input" data-rating="@i" style="cursor: pointer; color: #ffc107;"></i>
+                                    }
+                                </div>
+                                <input type="hidden" id="ratingInput" name="rating" value="0" required>
+                                <p id="ratingText" class="text-muted small mt-2">Puan seçmek için yıldızlara tıklayın</p>
+                            </div>
+                            <div class="mb-4">
+                                <label for="comment" class="small fw-bold text-uppercase text-muted mb-2 d-block">Yorumunuz</label>
+                                <textarea class="form-control rounded-3 border-light-subtle bg-light" id="commentInput" name="comment" rows="4" placeholder="Kitabın içeriği, yazarın üslubu ve baskı kalitesi hakkında ne düşünüyorsunuz?"></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">Değerlendirmeyi Yayınla</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Yorum Listesi -->
+                <div id="reviewsList" class="d-flex flex-column gap-3">
+                    @{
+                        var reviews = ViewBag.Reviews as List<WebKitapyurdu.Models.Review>;
+                    }
+                    @if (reviews != null && reviews.Any())
+                    {
+                        foreach (var review in reviews)
+                        {
+                            <div class="card border-0 shadow-sm rounded-4 p-4 review-item">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-circle bg-primary text-white">@review.Username[0]</div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold">@review.Username</h6>
+                                            <div class="text-warning small">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="bi @(i <= review.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">@review.ReviewDate.ToString("dd MMMM yyyy")</small>
+                                </div>
+                                <p class="mb-0 text-secondary" style="font-style: italic;">"@review.Comment"</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-light">
+                            <i class="bi bi-chat-quote display-1 text-muted opacity-25 mb-3"></i>
+                            <h5 class="text-muted">Henüz hiç yorum yapılmamış.</h5>
+                            <p class="text-muted mb-0">İlk değerlendirmeyi yapan siz olun!</p>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <!-- Yan Panel -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold mb-4">Ürün Bilgileri</h5>
+                    <div class="info-list">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Yayınevi</span>
+                            <span class="fw-bold">@(Model.Publisher ?? "-")</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Sayfa Sayısı</span>
+                            <span class="fw-bold">@(Model.PageCount?.ToString() ?? "-")</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Dil</span>
+                            <span class="fw-bold">@Model.Language</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">ISBN</span>
+                            <span class="fw-bold">@(Model.ISBN ?? "-")</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted">Stok Durumu</span>
+                            <span class="badge @(Model.StockQuantity > 0 ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger") rounded-pill">
+                                @(Model.StockQuantity > 0 ? "Stokta Var" : "Tükendi")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-dark text-white">
+                    <h5 class="text-warning mb-3 fw-bold"><i class="bi bi-shield-check me-2"></i> Kitapyurdu Güvencesi</h5>
+                    <p class="small opacity-75 mb-0">
+                        Bu ürün orijinal baskıdır ve Kitapyurdu güvencesi ile kapınıza ulaştırılmaktadır. Koşulsuz iade garantisi mevcuttur.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .category-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        background: rgba(255,193,7,0.1);
+        color: #ffc107;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 1.2rem;
+    }
+    .review-item {
+        transition: transform 0.2s ease;
+    }
+    .review-item:hover {
+        transform: translateX(5px);
+    }
+    .star-input:hover {
+        transform: scale(1.2);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Yıldız Değerlendirme Sistemi
+        const stars = document.querySelectorAll('.star-input');
+        const ratingInput = document.getElementById('ratingInput');
+        const ratingText = document.getElementById('ratingText');
+        const ratingMeanings = {
+            1: 'Kötü',
+            2: 'Zayıf',
+            3: 'Orta',
+            4: 'İyi',
+            5: 'Mükemmel'
+        };
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = this.getAttribute('data-rating');
+                ratingInput.value = rating;
+                updateStars(rating);
+                ratingText.textContent = ratingMeanings[rating];
+                ratingText.classList.remove('text-muted');
+                ratingText.classList.add('text-success', 'fw-bold');
+            });
+
+            star.addEventListener('mouseenter', function() {
+                const rating = this.getAttribute('data-rating');
+                updateStars(rating);
+            });
+        });
+
+        document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
+            updateStars(ratingInput.value);
+        });
+
+        function updateStars(rating) {
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.replace('bi-star', 'bi-star-fill');
+                } else {
+                    s.classList.replace('bi-star-fill', 'bi-star');
+                }
+            });
+        }
+
+        // Yorum Formu Gönderimi
+        document.getElementById('reviewForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const rating = ratingInput.value;
+            const comment = document.getElementById('commentInput').value.trim();
+
+            if (rating == 0) {
+                Swal.fire('Uyarı', 'Lütfen bir yıldız puanı seçin!', 'warning');
+                return;
+            }
+
+            if (!comment) {
+                Swal.fire('Uyarı', 'Lütfen kitap hakkında bir yorum yazın!', 'warning');
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('bookId', '@Model.BookID');
+            formData.append('rating', rating);
+            formData.append('comment', comment);
+
+            fetch('/Review/Add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Başarılı!',
+                        text: 'Değerlendirmeniz yayınlandı.',
+                        icon: 'success',
+                        confirmButtonText: 'Tamam'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Hata', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Hata', 'İşlem sırasında bir hata oluştu.', 'error');
+            });
+        });
+
+        // Diğer Fonksiyonlar (Sepet ve Favori)
+        function addToCart(bookId) {
+            fetch('/Cart/Add?bookId=' + bookId + '&quantity=1', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Ürün sepetinize eklendi.');
+                    if (window.updateCartBadge) window.updateCartBadge(data.cartCount);
+                } else {
+                    showNotification(data.message || 'Hata oluştu.', 'error');
+                }
+            });
+        }
+
+        function toggleFavorite(bookId) {
+            const btn = event.currentTarget;
+            const icon = btn.querySelector('i');
+            const isCurrentlyFavorite = icon.classList.contains('bi-heart-fill');
+            
+            fetch(isCurrentlyFavorite ? '/Favorite/Remove' : '/Favorite/Add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `bookId=${bookId}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    if (isCurrentlyFavorite) {
+                        icon.classList.replace('bi-heart-fill', 'bi-heart');
+                        icon.classList.remove('text-danger');
+                    } else {
+                        icon.classList.replace('bi-heart', 'bi-heart-fill');
+                        icon.classList.add('text-danger');
+                    }
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,136 @@
+================================================================================
+VERİTABANI HATASI ÇÖZÜM KILAVUZU
+================================================================================
+
+HATA MESAJI:
+------------
+Cannot open database "KitapyurduDB" requested by the login. The login failed.
+Login failed for user 'DESKTOP-7V4EKAH\Rama'.
+
+SORUN:
+------
+Veritabanı henüz oluşturulmamış veya kullanıcının erişim izni yok.
+
+ÇÖZÜM ADIMLARI:
+===============
+
+ADIM 1: SQL Server'ın Çalıştığını Kontrol Edin
+------------------------------------------------
+1. Windows tuşuna basın ve "Services" yazın
+2. "Services" uygulamasını açın
+3. "SQL Server (MSSQLSERVER)" veya "SQL Server (SQLEXPRESS)" servisini bulun
+4. Durumunun "Running" (Çalışıyor) olduğundan emin olun
+5. Eğer durdurulmuşsa, sağ tıklayıp "Start" (Başlat) seçin
+
+ADIM 2: SQL Server Management Studio (SSMS) ile Bağlanın
+----------------------------------------------------------
+1. SQL Server Management Studio'yu açın
+2. Server name: localhost veya . (nokta) yazın
+3. Authentication: Windows Authentication seçin
+4. Connect butonuna tıklayın
+
+ADIM 3: Veritabanını Oluşturun
+-------------------------------
+YÖNTEM A: Tek Script ile (ÖNERİLEN)
+------------------------------------
+1. SSMS'de "New Query" butonuna tıklayın
+2. Database/SetupDatabase.sql dosyasını açın
+3. Tüm içeriği kopyalayıp SSMS'e yapıştırın
+4. Execute (F5) tuşuna basın
+5. "Command(s) completed successfully" mesajını görmelisiniz
+
+YÖNTEM B: Ayrı Script Dosyaları ile
+-------------------------------------
+1. Database klasöründeki dosyaları SIRASIYLA çalıştırın:
+   a) CreateDatabase.sql
+   b) StoredProcedures.sql
+   c) Triggers.sql
+   d) Views.sql
+   e) Functions.sql
+   f) InsertSampleData.sql (opsiyonel)
+
+ADIM 4: Veritabanının Oluşturulduğunu Kontrol Edin
+----------------------------------------------------
+1. SSMS'de sol taraftaki Object Explorer'da
+2. "Databases" klasörünü genişletin
+3. "KitapyurduDB" veritabanını görmelisiniz
+4. Eğer görmüyorsanız, "Databases" üzerine sağ tıklayıp "Refresh" yapın
+
+ADIM 5: Kullanıcı İzinlerini Kontrol Edin
+-------------------------------------------
+1. SSMS'de "Security" > "Logins" klasörünü açın
+2. "DESKTOP-7V4EKAH\Rama" kullanıcısını bulun
+3. Eğer yoksa, yeni login oluşturun:
+   - Security > Logins > New Login
+   - Login name: DESKTOP-7V4EKAH\Rama
+   - Server roles: sysadmin seçin (veya en azından db_owner)
+   - User Mapping: KitapyurduDB seçin ve db_owner rolünü verin
+
+ADIM 6: Uygulamayı Tekrar Çalıştırın
+-------------------------------------
+1. Uygulamayı durdurun (Ctrl+C)
+2. Tekrar çalıştırın: dotnet run
+3. Artık hata almamalısınız
+
+ALTERNATİF ÇÖZÜM: Connection String'i Değiştirin
+================================================
+Eğer yukarıdaki adımlar işe yaramazsa, appsettings.json dosyasını düzenleyin:
+
+1. appsettings.json dosyasını açın
+2. ConnectionStrings bölümünü şu şekilde değiştirin:
+
+   SQL Server Express için:
+   "Server=localhost\\SQLEXPRESS;Database=KitapyurduDB;Integrated Security=True;TrustServerCertificate=True;"
+
+   Veya SQL Server Authentication kullanıyorsanız:
+   "Server=localhost;Database=KitapyurduDB;User Id=sa;Password=YourPassword;TrustServerCertificate=True;"
+
+SORUN GİDERME:
+==============
+
+SORUN: "SQL Server service is not running"
+ÇÖZÜM: Services.msc'den SQL Server servisini başlatın
+
+SORUN: "Cannot connect to server"
+ÇÖZÜM: 
+- SQL Server Configuration Manager'ı açın
+- SQL Server Services > SQL Server (MSSQLSERVER) > Properties
+- Service tab > Start Mode: Automatic yapın
+- Servisi başlatın
+
+SORUN: "Login failed for user"
+ÇÖZÜM:
+- SSMS'de Security > Logins > New Login
+- Windows kullanıcınızı ekleyin
+- Server roles: sysadmin veya db_owner verin
+
+SORUN: "Database already exists"
+ÇÖZÜM:
+- Eğer veritabanı zaten varsa, script çalışacaktır
+- Veya önce veritabanını silin: DROP DATABASE KitapyurduDB;
+
+HIZLI TEST:
+===========
+SSMS'de şu sorguyu çalıştırın:
+SELECT name FROM sys.databases WHERE name = 'KitapyurduDB';
+
+Eğer sonuç dönerse, veritabanı oluşturulmuştur.
+
+================================================================================
+DETAYLI LOG:
+================================================================================
+Hata loglarına göre:
+- Kullanıcı: DESKTOP-7V4EKAH\Rama
+- Veritabanı: KitapyurduDB
+- Hata: Veritabanı bulunamıyor veya erişim izni yok
+
+En olası neden: Veritabanı henüz oluşturulmamış.
+
+Çözüm: Database/SetupDatabase.sql dosyasını SSMS'de çalıştırın.
+
+================================================================================
+
+
+
+
+

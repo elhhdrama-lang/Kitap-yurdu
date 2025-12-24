@@ -1,0 +1,114 @@
+@model List<Seller>
+@{
+    ViewData["Title"] = "Satıcı Yönetimi";
+}
+
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/Admin/Dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Satıcılar</li>
+                </ol>
+            </nav>
+            <h1 class="display-font fw-bold">Satıcı Yönetimi</h1>
+        </div>
+        <div class="search-box">
+            <input type="text" id="sellerSearch" class="form-control rounded-pill px-4" placeholder="Satıcı ara...">
+        </div>
+    </div>
+
+    <div class="bg-white rounded-4 shadow-sm overflow-hidden border">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="px-4 py-3">Mağaza / Satıcı</th>
+                        <th class="py-3">E-posta</th>
+                        <th class="py-3">Kayıt Tarihi</th>
+                        <th class="py-3">Durum</th>
+                        <th class="px-4 py-3 text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="sellerTableBody">
+                    @foreach (var seller in Model)
+                    {
+                        <tr>
+                            <td class="px-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3 bg-info bg-opacity-10 text-info fw-bold">
+                                        @seller.CompanyName.Substring(0, 1).ToUpper()
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@seller.CompanyName</div>
+                                        <small class="text-muted">@@@seller.Username</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@seller.Email</td>
+                            <td>@seller.CreatedDate.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                <div class="form-check form-switch cursor-pointer">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="seller_status_@seller.SellerID" 
+                                           @(seller.IsActive ? "checked" : "") onchange="toggleSellerStatus(@seller.SellerID, this.checked)">
+                                    <label class="form-check-label small" for="seller_status_@seller.SellerID">
+                                        @(seller.IsActive ? "Aktif" : "Pasif")
+                                    </label>
+                                </div>
+                            </td>
+                            <td class="px-4 text-end">
+                                <a href="/Seller/Dashboard?sellerId=@seller.SellerID" class="btn btn-sm btn-outline-info rounded-pill px-3 me-2">Gözat</a>
+                                <button class="btn btn-sm btn-outline-dark rounded-circle" title="Detay"><i class="bi bi-info-lg"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cursor-pointer { cursor: pointer; }
+</style>
+
+<script>
+    function toggleSellerStatus(sellerId, isActive) {
+        const formData = new URLSearchParams();
+        formData.append('sellerId', sellerId);
+        formData.append('isActive', isActive);
+
+        fetch('/Admin/UpdateSellerStatus', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const label = document.querySelector(`label[for="seller_status_${sellerId}"]`);
+                label.textContent = isActive ? "Aktif" : "Pasif";
+                showNotification("Satıcı durumu güncellendi.");
+            } else {
+                showNotification(data.message || "Bir hata oluştu.", "error");
+            }
+        });
+    }
+
+    document.getElementById('sellerSearch').addEventListener('keyup', function() {
+        const query = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#sellerTableBody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.indexOf(query) > -1 ? '' : 'none';
+        });
+    });
+</script>

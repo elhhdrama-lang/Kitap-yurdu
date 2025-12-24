@@ -1,0 +1,293 @@
+@model Book
+@{
+    ViewData["Title"] = "Kitap Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var authors = (ViewBag.Authors as List<WebKitapyurdu.Models.Author>) ?? new List<WebKitapyurdu.Models.Author>();
+    var categories = (ViewBag.Categories as List<WebKitapyurdu.Models.Category>) ?? new List<WebKitapyurdu.Models.Category>();
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Kitap Düzenle: @Model.Title</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" name="BookID" value="@Model.BookID" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kitap Başlığı</label>
+                            <input type="text" class="form-control" name="Title" value="@Model.Title" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Yazar</label>
+                                <div class="input-group">
+                                    <select class="form-select" name="AuthorID" id="authorSelect" onchange="handleAuthorChange()" required>
+                                        <option value="new" style="color: #0d6efd; font-weight: bold;">➕ Yeni Yazar Ekle</option>
+                                        <option disabled>──────────</option>
+                                        @foreach (var author in authors)
+                                        {
+                                            if (author.AuthorID == Model.AuthorID)
+                                            {
+                                                <option value="@author.AuthorID" selected>@author.FullName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@author.AuthorID">@author.FullName</option>
+                                            }
+                                        }
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAuthorModal">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Kategori</label>
+                                <div class="input-group">
+                                    <select class="form-select" name="CategoryID" id="categorySelect" onchange="handleCategoryChange()" required>
+                                        <option value="new" style="color: #0d6efd; font-weight: bold;">➕ Yeni Kategori Ekle</option>
+                                        <option disabled>──────────</option>
+                                        @foreach (var category in categories)
+                                        {
+                                            if (category.CategoryID == Model.CategoryID)
+                                            {
+                                                <option value="@category.CategoryID" selected>@category.CategoryName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@category.CategoryID">@category.CategoryName</option>
+                                            }
+                                        }
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Yayınevi</label>
+                            <input type="text" class="form-control" name="Publisher" value="@Model.Publisher">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Fiyat</label>
+                                <input type="number" step="0.01" class="form-control" name="Price" value="@Model.Price.ToString("F2").Replace(',', '.')" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Stok Adedi</label>
+                                <input type="number" class="form-control" name="StockQuantity" value="@Model.StockQuantity" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Sayfa Sayısı</label>
+                                <input type="number" class="form-control" name="PageCount" value="@Model.PageCount">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">ISBN</label>
+                                <input type="text" class="form-control" name="ISBN" value="@Model.ISBN">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Dil</label>
+                                <input type="text" class="form-control" name="Language" value="@Model.Language">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Resim URL</label>
+                            <input type="url" class="form-control" name="ImageURL" value="@Model.ImageURL">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Açıklama</label>
+                            <textarea class="form-control" name="Description" rows="4">@Model.Description</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                             <label class="form-label fw-bold">Yayın Tarihi</label>
+                             <input type="date" class="form-control" name="PublishedDate" value="@(Model.PublishedDate?.ToString("yyyy-MM-dd"))">
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="/Admin/Products" class="btn btn-secondary">İptal</a>
+                            <button type="submit" class="btn btn-primary px-4">Güncelle</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yazar Ekleme Modal -->
+<div class="modal fade" id="addAuthorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Yazar Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Ad</label>
+                    <input type="text" class="form-control" id="authorFirstName" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Soyad</label>
+                    <input type="text" class="form-control" id="authorLastName" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Biyografi (Opsiyonel)</label>
+                    <textarea class="form-control" id="authorBiography" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="addAuthor()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kategori Ekleme Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Kategori Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Kategori Adı</label>
+                    <input type="text" class="form-control" id="categoryName" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Açıklama (Opsiyonel)</label>
+                    <textarea class="form-control" id="categoryDescription" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="addCategory()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleAuthorChange() {
+        const select = document.getElementById('authorSelect');
+        if (select.value === 'new') {
+            const modalElement = document.getElementById('addAuthorModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+            select.value = '';
+        }
+    }
+
+    function handleCategoryChange() {
+        const select = document.getElementById('categorySelect');
+        if (select.value === 'new') {
+            const modalElement = document.getElementById('addCategoryModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+            select.value = '';
+        }
+    }
+
+    function addAuthor() {
+        const firstName = document.getElementById('authorFirstName').value.trim();
+        const lastName = document.getElementById('authorLastName').value.trim();
+        const biography = document.getElementById('authorBiography').value.trim();
+
+        if (!firstName || !lastName) {
+            alert('Lütfen ad ve soyad alanlarını doldurun!');
+            return;
+        }
+
+        fetch('/Admin/AddAuthor', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&biography=${encodeURIComponent(biography)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modalElement = document.getElementById('addAuthorModal');
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+
+                const select = document.getElementById('authorSelect');
+                const option = document.createElement('option');
+                option.value = data.authorId;
+                option.text = `${firstName} ${lastName}`;
+                option.selected = true;
+                select.add(option);
+
+                document.getElementById('authorFirstName').value = '';
+                document.getElementById('authorLastName').value = '';
+                document.getElementById('authorBiography').value = '';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+
+    function addCategory() {
+        const categoryName = document.getElementById('categoryName').value.trim();
+        const description = document.getElementById('categoryDescription').value.trim();
+
+        if (!categoryName) {
+            alert('Lütfen kategori adını girin!');
+            return;
+        }
+
+        fetch('/Admin/AddCategory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `categoryName=${encodeURIComponent(categoryName)}&description=${encodeURIComponent(description)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modalElement = document.getElementById('addCategoryModal');
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+
+                const select = document.getElementById('categorySelect');
+                const option = document.createElement('option');
+                option.value = data.categoryId;
+                option.text = categoryName;
+                option.selected = true;
+                select.add(option);
+
+                document.getElementById('categoryName').value = '';
+                document.getElementById('categoryDescription').value = '';
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+</script>

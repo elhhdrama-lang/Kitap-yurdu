@@ -1,0 +1,97 @@
+@model Book
+@{
+    ViewData["Title"] = "Ürün Düzenle";
+    Layout = "~/Views/Shared/_LayoutSeller.cshtml";
+    var authors = ViewBag.Authors as List<WebKitapyurdu.Models.Author>;
+    var categories = ViewBag.Categories as List<WebKitapyurdu.Models.Category>;
+}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h4 class="mb-0">Kitap Düzenle: @Model.Title</h4>
+    </div>
+    <div class="card-body">
+         <form asp-action="EditProduct" method="post">
+            <input type="hidden" name="BookID" value="@Model.BookID" />
+            <input type="hidden" name="SellerID" value="@Model.SellerID" />
+            
+            <div class="row g-3">
+                <div class="col-md-12">
+                     <label class="form-label">Kitap Başlığı</label>
+                     <input type="text" class="form-control" name="Title" value="@Model.Title" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label">Yazar</label>
+                    <select class="form-select" name="AuthorID" required>
+                        @if(authors != null)
+                        {
+                            foreach (var author in authors)
+                            {
+                                <!option value="@author.AuthorID" @(author.AuthorID == Model.AuthorID ? "selected" : "")>@author.FullName</!option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                     <label class="form-label">Kategori</label>
+                     <select class="form-select" name="CategoryID" required>
+                        @if(categories != null)
+                        {
+                            foreach (var category in categories)
+                            {
+                                <!option value="@category.CategoryID" @(category.CategoryID == Model.CategoryID ? "selected" : "")>@category.CategoryName</!option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                     <label class="form-label">Yayınevi</label>
+                     <input type="text" class="form-control" name="Publisher" value="@Model.Publisher">
+                </div>
+                 <div class="col-md-6">
+                     <label class="form-label">Sayfa Sayısı</label>
+                     <input type="number" class="form-control" name="PageCount" value="@Model.PageCount">
+                </div>
+
+                <div class="col-md-4">
+                     <label class="form-label">Fiyat (TL)</label>
+                     <input type="number" step="0.01" class="form-control" name="Price" value="@Model.Price.ToString("F2").Replace(',', '.')" required>
+                </div>
+                <div class="col-md-4">
+                     <label class="form-label">Stok</label>
+                     <input type="number" class="form-control" name="StockQuantity" value="@Model.StockQuantity" required>
+                </div>
+                 <div class="col-md-4">
+                     <label class="form-label">Dil</label>
+                     <input type="text" class="form-control" name="Language" value="@Model.Language">
+                </div>
+
+                <div class="col-md-6">
+                     <label class="form-label">ISBN</label>
+                     <input type="text" class="form-control" name="ISBN" value="@Model.ISBN">
+                </div>
+                <div class="col-md-6">
+                     <label class="form-label">Resim URL</label>
+                     <input type="url" class="form-control" name="ImageURL" value="@Model.ImageURL">
+                </div>
+
+                <div class="col-12">
+                     <label class="form-label">Açıklama</label>
+                     <textarea class="form-control" name="Description" rows="4">@Model.Description</textarea>
+                </div>
+                
+                 <div class="col-md-4">
+                     <label class="form-label">Yayın Tarihi</label>
+                      <input type="date" class="form-control" name="PublishedDate" value="@(Model.PublishedDate?.ToString("yyyy-MM-dd"))">
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary px-4">Güncelle</button>
+                    <a href="/Seller/MyProducts" class="btn btn-secondary px-4">İptal</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,95 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Sipariş Geçmişi";
+}
+
+<div class="container py-5">
+    <div class="row mb-5 align-items-end">
+        <div class="col-md-8">
+            <h1 class="display-font mb-2">Siparişlerim</h1>
+            <p class="text-muted mb-0">Geçmişten bugüne tüm kitap yolculuklarınız burada.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+             <span class="badge-premium">Toplam @Model.Count Sipariş</span>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="order-timeline">
+            @foreach (var order in Model)
+            {
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="card border-0 shadow-soft rounded-4 overflow-hidden mb-4">
+                        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom-0">
+                            <div>
+                                <span class="text-muted small text-uppercase fw-bold d-block mb-1">SİPARİŞ TARİHİ</span>
+                                <span class="fw-bold">@order.OrderDate.ToString("dd MMMM yyyy")</span>
+                            </div>
+                            <div class="text-center px-4 d-none d-md-block">
+                                <span class="text-muted small text-uppercase fw-bold d-block mb-1">TOPLAM</span>
+                                <span class="fw-bold text-accent">@order.TotalAmount.ToString("C")</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge rounded-pill py-2 px-3 @(order.Status == "Pending" ? "bg-warning-subtle text-warning" : order.Status == "Completed" ? "bg-success-subtle text-success" : "bg-light text-muted") shadow-none border">
+                                    <i class="bi bi-dot me-1"></i>
+                                    @(order.Status == "Pending" ? "Hazırlanıyor" : order.Status == "Completed" ? "Teslim Edildi" : order.Status)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-4 bg-light-subtle">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex gap-3 overflow-auto pb-2">
+                                        @foreach (var detail in order.OrderDetails.Take(4))
+                                        {
+                                            <div class="bg-white p-2 rounded-3 shadow-sm border" style="min-width: 250px;">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="bg-dark text-white rounded p-1 text-center" style="width: 40px; height: 50px; font-size: 0.7rem;">
+                                                        IMG
+                                                    </div>
+                                                    <div class="overflow-hidden">
+                                                        <h6 class="mb-0 text-truncate font-outfit" style="max-width: 160px;">@detail.BookTitle</h6>
+                                                        <small class="text-muted d-block">@detail.Quantity Adet</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (order.OrderDetails.Count > 4)
+                                        {
+                                            <div class="d-flex align-items-center px-3 text-muted">
+                                                <small>+@(order.OrderDetails.Count - 4) Diğer</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <a href="/Order/Details/@order.OrderID" class="btn btn-premium btn-sm rounded-pill px-4">
+                                        Detaylara Git <i class="bi bi-chevron-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-box-seam display-1 text-muted opacity-25"></i>
+            </div>
+            <h4 class="display-font">Henüz siparişiniz yok.</h4>
+            <p class="text-muted">En sevdiğiniz yazarların eserlerini keşfetmeye ne dersiniz?</p>
+            <a href="/" class="btn btn-premium mt-3">Alışverişe Başla</a>
+        </div>
+    }
+</div>
+
+
+
+
+

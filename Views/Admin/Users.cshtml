@@ -1,0 +1,117 @@
+@model List<User>
+@{
+    ViewData["Title"] = "Kullanıcı Yönetimi";
+}
+
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/Admin/Dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Kullanıcılar</li>
+                </ol>
+            </nav>
+            <h1 class="display-font fw-bold">Kullanıcı Yönetimi</h1>
+        </div>
+        <div class="search-box">
+            <input type="text" id="userSearch" class="form-control rounded-pill px-4" placeholder="Kullanıcı ara...">
+        </div>
+    </div>
+
+    <div class="bg-white rounded-4 shadow-sm overflow-hidden border">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="px-4 py-3">Kullanıcı</th>
+                        <th class="py-3">E-posta</th>
+                        <th class="py-3">Rol</th>
+                        <th class="py-3">Kayıt Tarihi</th>
+                        <th class="py-3">Durum</th>
+                        <th class="px-4 py-3 text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td class="px-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3 bg-secondary bg-opacity-10 text-secondary fw-bold">
+                                        @user.Username.Substring(0, 1).ToUpper()
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">@user.Username</div>
+                                        <small class="text-muted">@user.FirstName @user.LastName</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@user.Email</td>
+                            <td>
+                                <span class="badge @(user.Role == "Admin" ? "bg-danger" : (user.Role == "Seller" ? "bg-info" : "bg-primary")) rounded-pill">@user.Role</span>
+                            </td>
+                            <td>@user.CreatedDate.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                <div class="form-check form-switch cursor-pointer">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="status_@user.UserID" 
+                                           @(user.IsActive ? "checked" : "") onchange="toggleUserStatus(@user.UserID, this.checked)">
+                                    <label class="form-check-label small" for="status_@user.UserID">
+                                        @(user.IsActive ? "Aktif" : "Pasif")
+                                    </label>
+                                </div>
+                            </td>
+                            <td class="px-4 text-end">
+                                <button class="btn btn-sm btn-outline-dark rounded-circle" title="Detay"><i class="bi bi-info-lg"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cursor-pointer { cursor: pointer; }
+</style>
+
+<script>
+    function toggleUserStatus(userId, isActive) {
+        const formData = new URLSearchParams();
+        formData.append('userId', userId);
+        formData.append('isActive', isActive);
+
+        fetch('/Admin/UpdateUserStatus', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const label = document.querySelector(`label[for="status_${userId}"]`);
+                label.textContent = isActive ? "Aktif" : "Pasif";
+                showNotification("Kullanıcı durumu güncellendi.");
+            } else {
+                showNotification(data.message || "Bir hata oluştu.", "error");
+            }
+        });
+    }
+
+    document.getElementById('userSearch').addEventListener('keyup', function() {
+        const query = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#userTableBody tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.indexOf(query) > -1 ? '' : 'none';
+        });
+    });
+</script>

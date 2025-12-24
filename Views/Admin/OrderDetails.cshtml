@@ -1,0 +1,87 @@
+@model Order
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h3>Sipariş Detayı #@Model.OrderID</h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Sipariş Tarihi:</strong> @Model.OrderDate.ToString("dd.MM.yyyy HH:mm")<br>
+                    <strong>Durum:</strong> 
+                    <span class="badge @(Model.Status == "Completed" ? "bg-success" : Model.Status == "Shipped" ? "bg-info" : "bg-warning")">
+                        @Model.Status
+                    </span><br>
+                    <strong>Toplam Tutar:</strong> @Model.TotalAmount.ToString("C")<br>
+                    @if (!string.IsNullOrEmpty(Model.ShippingAddress))
+                    {
+                        <strong>Teslimat Adresi:</strong> @Model.ShippingAddress<br>
+                    }
+                </div>
+
+                <hr>
+
+                <h5>Sipariş Öğeleri</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Kitap</th>
+                                <th>Adet</th>
+                                <th>Birim Fiyat</th>
+                                <th>Toplam</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>@detail.BookTitle</td>
+                                    <td>@detail.Quantity</td>
+                                    <td>@detail.UnitPrice.ToString("C")</td>
+                                    <td>@detail.SubTotal.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr>
+
+                <h5>Kargo Bilgisi</h5>
+                <form method="post" action="/Admin/UpdateTracking">
+                    <input type="hidden" name="orderId" value="@Model.OrderID" />
+                    <div class="mb-3">
+                        <label for="trackingNumber" class="form-label">Kargo Takip Numarası</label>
+                        <input type="text" class="form-control" id="trackingNumber" name="trackingNumber" 
+                               value="@Model.TrackingNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shippingInfo" class="form-label">Kargo Bilgisi (Opsiyonel)</label>
+                        <textarea class="form-control" id="shippingInfo" name="shippingInfo" rows="3">@Model.ShippingInfo</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Kargo Bilgisini Güncelle
+                    </button>
+                    <a href="/Admin/Orders" class="btn btn-secondary">Geri Dön</a>
+                </form>
+
+                @if (!string.IsNullOrEmpty(Model.TrackingNumber))
+                {
+                    <div class="mt-3 alert alert-info">
+                        <strong>Kargo Takip No:</strong> @Model.TrackingNumber<br>
+                        @if (!string.IsNullOrEmpty(Model.ShippingInfo))
+                        {
+                            <strong>Kargo Bilgisi:</strong> @Model.ShippingInfo
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
