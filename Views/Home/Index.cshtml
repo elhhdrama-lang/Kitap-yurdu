@@ -7,6 +7,29 @@
 <!-- Cinematic Hero Section -->
 <div class="hero-wrapper text-center">
     <div class="container">
+    <div class="container">
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">
+                <h4>Hata Oluştu</h4>
+                <p>@ViewBag.Error</p>
+                @if (ViewBag.ErrorDetail != null)
+                {
+                    <pre style="max-height: 200px; overflow: auto;">@ViewBag.ErrorDetail</pre>
+                }
+            </div>
+        }
+        
+        @if (ViewBag.Warning != null)
+        {
+             <div class="alert alert-warning">
+                <strong>Uyarı:</strong> @ViewBag.Warning <br>
+                <small>@ViewBag.DebugInfo</small>
+            </div>
+        }
+
+
+
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <span class="badge-premium mb-3 d-inline-block animate__animated animate__fadeInDown">Koleksiyon 2025</span>
@@ -26,7 +49,7 @@
 </div>
 
 <!-- Featured Section -->
-<div class="container mb-5 mt-n5 position-relative" style="z-index: 10;">
+<div class="container mb-5 mt-5 position-relative" style="z-index: 10;">
     <div class="row g-4 justify-content-center">
         @foreach (var book in bestSelling.Take(3))
         {

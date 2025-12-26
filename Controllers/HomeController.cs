@@ -24,16 +24,24 @@ namespace WebKitapyurdu.Controllers
             try
             {
                 var books = _dbHelper.GetAllBooks();
+                if (books == null || books.Count == 0)
+                {
+                    ViewBag.Warning = "Veritabanından hiç kitap gelmedi (Liste boş).";
+                    // Debug verisi:
+                    ViewBag.DebugInfo = "Bağlantı başarılı ama veri yok.";
+                }
+
+
                 var bestSelling = _dbHelper.GetBestSellingBooks(5);
-                
                 ViewBag.BestSelling = bestSelling;
+                
                 return View(books);
             }
             catch (Exception ex)
             {
-                // Veritabanı bağlantı hatası durumunda kullanıcıya bilgi ver
-                ViewBag.Error = "Veritabanı bağlantı hatası. Lütfen veritabanının oluşturulduğundan emin olun.";
-                ViewBag.Details = ex.Message;
+                // Hatanın tamamını göster
+                ViewBag.Error = "Veri çekme hatası: " + ex.Message;
+                ViewBag.ErrorDetail = ex.ToString(); 
                 return View(new List<Book>());
             }
         }
