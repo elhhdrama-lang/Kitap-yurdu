@@ -1,14 +1,9 @@
--- =============================================
--- TRIGGERS (TRG)
--- En az 4 adet Trigger
--- =============================================
 
+-- TRIGGERS (TRG)
 USE KitapyurduDB;
 GO
 
--- =============================================
 -- TRG 1: Sipariş detayı eklendiğinde stok azalt
--- =============================================
 IF OBJECT_ID('trg_OrderDetail_Insert_UpdateStock', 'TR') IS NOT NULL
     DROP TRIGGER trg_OrderDetail_Insert_UpdateStock;
 GO
@@ -37,9 +32,8 @@ BEGIN
 END
 GO
 
--- =============================================
+
 -- TRG 2: Kitap fiyatı değiştiğinde log tut
--- =============================================
 IF OBJECT_ID('PriceChangeLog', 'U') IS NOT NULL
     DROP TABLE PriceChangeLog;
 GO
@@ -82,9 +76,8 @@ BEGIN
 END
 GO
 
--- =============================================
+
 -- TRG 3: Yeni kullanıcı kaydında hoş geldin mesajı
--- =============================================
 IF OBJECT_ID('UserWelcomeLog', 'U') IS NOT NULL
     DROP TABLE UserWelcomeLog;
 GO
@@ -117,9 +110,8 @@ BEGIN
 END
 GO
 
--- =============================================
+
 -- TRG 4: Sipariş iptal edildiğinde stok geri ekle
--- =============================================
 IF OBJECT_ID('trg_Order_Update_RestoreStock', 'TR') IS NOT NULL
     DROP TRIGGER trg_Order_Update_RestoreStock;
 GO

@@ -1,14 +1,11 @@
--- =============================================
+
 -- STORED PROCEDURES (SP)
--- En az 5 adet Stored Procedure
--- =============================================
 
 USE KitapyurduDB;
 GO
 
--- =============================================
--- SP 1: Kullanıcıya göre siparişleri getir
--- =============================================
+
+-- SP 1: Kullanıcıya göre siparişleri getir=
 IF OBJECT_ID('sp_GetUserOrders', 'P') IS NOT NULL
     DROP PROCEDURE sp_GetUserOrders;
 GO
@@ -40,9 +37,8 @@ BEGIN
 END
 GO
 
--- =============================================
+
 -- SP 2: Kategoriye göre kitapları getir
--- =============================================
 IF OBJECT_ID('sp_GetBooksByCategory', 'P') IS NOT NULL
     DROP PROCEDURE sp_GetBooksByCategory;
 GO
@@ -77,9 +73,8 @@ BEGIN
 END
 GO
 
--- =============================================
+
 -- SP 3: Sipariş oluştur
--- =============================================
 IF OBJECT_ID('sp_CreateOrder', 'P') IS NOT NULL
     DROP PROCEDURE sp_CreateOrder;
 GO
@@ -141,9 +136,7 @@ BEGIN
 END
 GO
 
--- =============================================
 -- SP 4: En çok satan kitapları getir
--- =============================================
 IF OBJECT_ID('sp_GetBestSellingBooks', 'P') IS NOT NULL
     DROP PROCEDURE sp_GetBestSellingBooks;
 GO
@@ -175,9 +168,7 @@ BEGIN
 END
 GO
 
--- =============================================
 -- SP 5: Kullanıcı sepetini getir
--- =============================================
 IF OBJECT_ID('sp_GetUserCart', 'P') IS NOT NULL
     DROP PROCEDURE sp_GetUserCart;
 GO

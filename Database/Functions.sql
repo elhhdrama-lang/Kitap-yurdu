@@ -1,14 +1,9 @@
--- =============================================
--- FUNCTIONS
--- En az 3 adet Fonksiyon
--- =============================================
 
 USE KitapyurduDB;
 GO
 
--- =============================================
+
 -- FUNCTION 1: Kullanıcının toplam sipariş tutarını hesapla
--- =============================================
 IF OBJECT_ID('fn_CalculateUserTotalOrderAmount', 'FN') IS NOT NULL
     DROP FUNCTION fn_CalculateUserTotalOrderAmount;
 GO
@@ -28,9 +23,7 @@ BEGIN
 END
 GO
 
--- =============================================
 -- FUNCTION 2: Kategorideki kitap sayısını getir
--- =============================================
 IF OBJECT_ID('fn_GetCategoryBookCount', 'FN') IS NOT NULL
     DROP FUNCTION fn_GetCategoryBookCount;
 GO
@@ -50,9 +43,7 @@ BEGIN
 END
 GO
 
--- =============================================
 -- FUNCTION 3: Kitabın ortalama değerlendirme puanını hesapla
--- =============================================
 -- Önce Reviews tablosu oluşturalım (eğer yoksa)
 IF OBJECT_ID('Reviews', 'U') IS NULL
 BEGIN
@@ -88,9 +79,8 @@ BEGIN
 END
 GO
 
--- =============================================
 -- FUNCTION 4 (Bonus): İki tarih arasındaki sipariş sayısını getir
--- =============================================
+
 IF OBJECT_ID('fn_GetOrderCountByDateRange', 'FN') IS NOT NULL
     DROP FUNCTION fn_GetOrderCountByDateRange;
 GO
